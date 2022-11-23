@@ -123,7 +123,6 @@
 //!     
 //!     Ok(())
 //! }
-//!
 //! ```
 //!
 //! [`Array2D`]: struct.Array2D.html
@@ -139,6 +138,12 @@
 //! [`get`]: struct.Array2D.html#method.get
 //! [`get_mut`]: struct.Array2D.html#method.get_mut
 //! [`set`]: struct.Array2D.html#method.set
+//! [`get_row_major`]: struct.Array2D.html#method.get_row_major
+//! [`get_mut_row_major`]: struct.Array2D.html#method.get_mut_row_major
+//! [`set_row_major`]: struct.Array2D.html#method.set_row_major
+//! [`get_column_major`]: struct.Array2D.html#method.get_column_major
+//! [`get_mut_column_major`]: struct.Array2D.html#method.get_mut_column_major
+//! [`set_column_major`]: struct.Array2D.html#method.set_column_major
 //! [`elements_row_major_iter`]: struct.Array2D.html#method.elements_row_major_iter
 //! [`elements_column_major_iter`]: struct.Array2D.html#method.elements_column_major_iter
 //! [`elements_row_major_iter_mut`]: struct.Array2D.html#method.elements_row_major_iter_mut
@@ -738,7 +743,7 @@ impl<T> Array2D<T> {
             .map(|location| {
                 *location = element;
             })
-            .ok_or_else(|| Error::IndicesOutOfBounds(row, column))
+            .ok_or(Error::IndicesOutOfBounds(row, column))
     }
 
     /// Changes the element at the given `index` to `element`, in row major
@@ -768,7 +773,7 @@ impl<T> Array2D<T> {
             .map(|location| {
                 *location = element;
             })
-            .ok_or_else(|| Error::IndexOutOfBounds(index))
+            .ok_or(Error::IndexOutOfBounds(index))
     }
 
     /// Changes the element at the given `index` to `element`, in column major
@@ -798,7 +803,7 @@ impl<T> Array2D<T> {
             .map(|location| {
                 *location = element;
             })
-            .ok_or_else(|| Error::IndexOutOfBounds(index))
+            .ok_or(Error::IndexOutOfBounds(index))
     }
 
     /// Returns an [`Iterator`] over references to all elements in [row major
@@ -820,7 +825,7 @@ impl<T> Array2D<T> {
     ///
     /// [`Iterator`]: https://doc.rust-lang.org/std/iter/trait.Iterator.html
     /// [row major order]: https://en.wikipedia.org/wiki/Row-_and_column-major_order
-    pub fn elements_row_major_iter(&self) -> impl DoubleEndedIterator<Item = &T> {
+    pub fn elements_row_major_iter(&self) -> impl DoubleEndedIterator<Item = &T> + Clone {
         self.array.iter()
     }
 
@@ -874,9 +879,8 @@ impl<T> Array2D<T> {
     ///
     /// [`Iterator`]: https://doc.rust-lang.org/std/iter/trait.Iterator.html
     /// [column major order]: https://en.wikipedia.org/wiki/Row-_and_column-major_order
-    pub fn elements_column_major_iter(&self) -> impl DoubleEndedIterator<Item = &T> {
-        (0..self.num_columns)
-            .flat_map(move |column| (0..self.num_rows).map(move |row| &self[(row, column)]))
+    pub fn elements_column_major_iter(&self) -> impl DoubleEndedIterator<Item = &T> + Clone {
+        self.indices_column_major().map(move |i| &self[i])
     }
 
     /// Returns an [`Iterator`] over mutable references to all elements in [column major
@@ -1071,7 +1075,7 @@ impl<T> Array2D<T> {
     /// [`Item`]: https://doc.rust-lang.org/std/iter/trait.Iterator.html#associatedtype.Item
     pub fn rows_iter(
         &self,
-    ) -> impl DoubleEndedIterator<Item = impl DoubleEndedIterator<Item = &T>> {
+    ) -> impl DoubleEndedIterator<Item = impl DoubleEndedIterator<Item = &T>> + Clone {
         (0..self.num_rows()).map(move |row_index| {
             self.row_iter(row_index)
                 .expect("rows_iter should never fail")
@@ -1166,7 +1170,7 @@ impl<T> Array2D<T> {
     /// [`Item`]: https://doc.rust-lang.org/std/iter/trait.Iterator.html#associatedtype.Item
     pub fn columns_iter(
         &self,
-    ) -> impl DoubleEndedIterator<Item = impl DoubleEndedIterator<Item = &T>> {
+    ) -> impl DoubleEndedIterator<Item = impl DoubleEndedIterator<Item = &T>> + Clone {
         (0..self.num_columns).map(move |column_index| {
             self.column_iter(column_index)
                 .expect("columns_iter should never fail")
@@ -1348,7 +1352,7 @@ impl<T> Array2D<T> {
     /// ```
     ///
     /// [`usize`]: https://doc.rust-lang.org/std/primitive.usize.html
-    pub fn indices_row_major(&self) -> impl DoubleEndedIterator<Item = (usize, usize)> {
+    pub fn indices_row_major(&self) -> impl DoubleEndedIterator<Item = (usize, usize)> + Clone {
         indices_row_major(self.num_rows, self.num_columns)
     }
 
@@ -1371,7 +1375,7 @@ impl<T> Array2D<T> {
     /// ```
     ///
     /// [`usize`]: https://doc.rust-lang.org/std/primitive.usize.html
-    pub fn indices_column_major(&self) -> impl DoubleEndedIterator<Item = (usize, usize)> {
+    pub fn indices_column_major(&self) -> impl DoubleEndedIterator<Item = (usize, usize)> + Clone {
         indices_column_major(self.num_rows, self.num_columns)
     }
 
@@ -1399,7 +1403,7 @@ impl<T> Array2D<T> {
     /// # }
     ///
     /// [`usize`]: https://doc.rust-lang.org/std/primitive.usize.html
-    pub fn enumerate_row_major(&self) -> impl DoubleEndedIterator<Item = ((usize, usize), &T)> {
+    pub fn enumerate_row_major(&self) -> impl DoubleEndedIterator<Item = ((usize, usize), &T)> + Clone {
         self.indices_row_major().map(move |i| (i, &self[i]))
     }
 
@@ -1427,7 +1431,7 @@ impl<T> Array2D<T> {
     /// # }
     ///
     /// [`usize`]: https://doc.rust-lang.org/std/primitive.usize.html
-    pub fn enumerate_column_major(&self) -> impl DoubleEndedIterator<Item = ((usize, usize), &T)> {
+    pub fn enumerate_column_major(&self) -> impl DoubleEndedIterator<Item = ((usize, usize), &T)> + Clone {
         self.indices_column_major().map(move |i| (i, &self[i]))
     }
 
@@ -1503,13 +1507,13 @@ fn flatten<T: Clone>(nested: &[Vec<T>]) -> Vec<T> {
 fn indices_row_major(
     num_rows: usize,
     num_columns: usize,
-) -> impl DoubleEndedIterator<Item = (usize, usize)> {
+) -> impl DoubleEndedIterator<Item = (usize, usize)> + Clone {
     (0..num_rows).flat_map(move |row| (0..num_columns).map(move |column| (row, column)))
 }
 
 fn indices_column_major(
     num_rows: usize,
     num_columns: usize,
-) -> impl DoubleEndedIterator<Item = (usize, usize)> {
+) -> impl DoubleEndedIterator<Item = (usize, usize)> + Clone {
     (0..num_columns).flat_map(move |column| (0..num_rows).map(move |row| (row, column)))
 }
