@@ -8,11 +8,36 @@ image processing, game development, and other situations. Vecgrid cannot be used
 when rows or columns might have different lengths⁠—all rows and columns must
 be the same length.
 
+Vecgrid is a fork of the statically-sized two-dimensional array library [`Array2D`].
+
+## Roadmap
+
+This project attemps to extend the upstream project in an opinionated fashion, by adding mutable iterators and dynamic resizing of the inner collection. Here's how that is going:
+
+- [x] `row_iter_mut`
+- [x] `column_iter_mut`
+- [x] `rows_iter_mut`
+- [x] `columns_iter_mut`
+- [x] `elements_row_major_iter_mut`
+- [x] `elements_column_major_iter_mut`
+- [ ] `insert_row`
+- [ ] `insert_column`
+- [ ] `insert_rows`
+- [ ] `insert_columns`
+- [ ] `remove_row`
+- [ ] `remove column`
+- [ ] `append_rows`
+- [ ] `append_columns`
+- [ ] `extend_rows`
+- [ ] `extend_columns`
+
+Upstream code might be refactored along the way to make use of optimizations or to align approaches across the crate. Code deprecated upstream from before the inital release of this crate is dropped, future deprecated upstream code may or may not be deprecated in this crate in kind. A release of a major version of this crate indicates maturity surpassing active tracking of the upstream repository, but until then changes will be synced as they happen.
+
 ## How to use [`Vecgrid`]
 
-### Creating an [`Vecgrid`]
+### Creating a [`Vecgrid`]
 
-An [`Vecgrid`] can be created in many different ways. These include:
+A [`Vecgrid`] can be created in many different ways. These include:
 
 - Providing the rows or the columns, which must all be the same size (see
   [`from_rows`] and [`from_columns`]).
@@ -28,7 +53,7 @@ An [`Vecgrid`] can be created in many different ways. These include:
 - Providing an iterator that is used to produce values to fill the vecgrid
   (see [`from_iter_row_major`] and [`from_iter_column_major`]).
 
-### Accessing data from an [`Vecgrid`]
+### Accessing data from a [`Vecgrid`]
 
 [`Vecgrid`] supports several forms of indexing:
 
@@ -54,9 +79,9 @@ through:
 - All rows or all columns (see [`rows_iter`] and [`columns_iter`]).
 - All rows or all columns of mutable entries (see [`rows_iter_mut`] and [`columns_iter_mut`]).
 
-### Extracting all data from an [`Vecgrid`]
+### Extracting all data from a [`Vecgrid`]
 
-An [`Vecgrid`] can be converted back into a [`Vec`] through several
+A [`Vecgrid`] can be converted back into a [`Vec`] through several
 methods. You can extract the data as:
 
 - A [`Vec`] of rows or columns (see [`as_rows`] and [`as_columns`]).
@@ -69,13 +94,13 @@ methods. You can extract the data as:
 use vecgrid::{Vecgrid, Error};
 
 pub fn main() -> Result<(), Error> {
-    // Create an vecgrid filled with the same element.
+    // Create a vecgrid filled with the same element.
     let prefilled = Vecgrid::filled_with(42, 2, 3);
     assert_eq!(prefilled.num_rows(), 2);
     assert_eq!(prefilled.num_columns(), 3);
     assert_eq!(prefilled[(0, 0)], 42);
 
-    // Create an vecgrid from the given rows. You can also use columns
+    // Create a vecgrid from the given rows. You can also use columns
     // with the `columns` function
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
     let from_rows = Vecgrid::from_rows(&rows)?;
@@ -83,7 +108,7 @@ pub fn main() -> Result<(), Error> {
     assert_eq!(from_rows.num_columns(), 3);
     assert_eq!(from_rows[(1, 1)], 5);
 
-    // Create an vecgrid from a flat Vec of elements in row major or
+    // Create  vecgrid from a flat Vec of elements in row major or
     // column major order.
     let column_major = vec![1, 4, 2, 5, 3, 6];
     let from_column_major =
@@ -95,7 +120,7 @@ pub fn main() -> Result<(), Error> {
     // Implements `Eq` if the element type does.
     assert_eq!(from_rows, from_column_major);
 
-    // Index into an vecgrid using a tuple of usize to access or alter
+    // Index into a vecgrid using a tuple of usize to access or alter
     // the vecgrid.
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
     let mut vecgrid = Vecgrid::from_rows(&rows)?;
@@ -131,6 +156,10 @@ pub fn main() -> Result<(), Error> {
 
 ```
 
+## Acknowledgement
+
+This library is made possible thanks to the excellent groundwork laid down in [`Array2D`] by author [HarrisonMc555](https://github.com/HarrisonMc555), as well as contributor to the upstream project [tylerjw](https://github.com/tylerjw). [`Array2D`] has been published under the MIT license.
+
 [`vecgrid`]: struct.Vecgrid.html
 [`from_rows`]: struct.Vecgrid.html#method.from_rows
 [`from_columns`]: struct.Vecgrid.html#method.from_columns
@@ -165,5 +194,6 @@ pub fn main() -> Result<(), Error> {
 [`result`]: https://doc.rust-lang.org/std/result/
 [`(usize, usize)`]: https://doc.rust-lang.org/std/primitive.usize.html
 [row major or column major order]: https://en.wikipedia.org/wiki/Row-_and_column-major_order
+[`array2d`]: https://github.com/HarrisonMc555/array2d
 
 License: MIT
