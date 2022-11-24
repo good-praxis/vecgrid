@@ -1,90 +1,93 @@
-# array2d
+# vecgrid
 
-Array2D provides a fixed sized two-dimensional array. It is more efficient
+Vecgrid provides a dynamically sized two-dimensional vector. It is more efficient
 and is easier to use than a vector of vectors, i.e. `Vec<Vec<T>>`.
 
 This is beneficial when using a grid-like structure, which is common in
-image processing, game boards, and other situations. Array2D cannot be used
+image processing, game development, and other situations. Vecgrid cannot be used
 when rows or columns might have different lengths⁠—all rows and columns must
 be the same length.
 
-## How to use [`Array2D`]
+## How to use [`Vecgrid`]
 
-### Creating an [`Array2D`]
+### Creating an [`Vecgrid`]
 
-An [`Array2D`] can be created in many different ways. These include:
-  - Providing the rows or the columns, which must all be the same size (see
-    [`from_rows`] and [`from_columns`]).
-  - Providing a "flat" slice of elements in either [row major or column
-    major order] along with the dimensions, which must match the number of
-    elements in the slice (see [`from_row_major`] and
-    [`from_column_major`]).
-  - Providing a value to repeatedly put in every location (see
-    [`filled_with`]).
-  - Providing a generator function that is repeatedly called to produce
-    values to fill the array (see [`filled_by_row_major`] and
-    [`filled_by_column_major`]).
-  - Providing an iterator that is used to produce values to fill the array
-    (see [`from_iter_row_major`] and [`from_iter_column_major`]).
+An [`Vecgrid`] can be created in many different ways. These include:
 
-### Accessing data from an [`Array2D`]
+- Providing the rows or the columns, which must all be the same size (see
+  [`from_rows`] and [`from_columns`]).
+- Providing a "flat" slice of elements in either [row major or column
+  major order] along with the dimensions, which must match the number of
+  elements in the slice (see [`from_row_major`] and
+  [`from_column_major`]).
+- Providing a value to repeatedly put in every location (see
+  [`filled_with`]).
+- Providing a generator function that is repeatedly called to produce
+  values to fill the vecgrid (see [`filled_by_row_major`] and
+  [`filled_by_column_major`]).
+- Providing an iterator that is used to produce values to fill the vecgrid
+  (see [`from_iter_row_major`] and [`from_iter_column_major`]).
 
-[`Array2D`] supports several forms of indexing:
-  - Using the indexing syntax (square brackets) with a tuple of [`(usize,
-    usize)`], which panics on out-of-bounds accesses.
-  - Using the [`get`], [`get_mut`], and [`set`] methods, which return an
-    [`Option`] or a [`Result`] on out-of-bounds accesses.
-  - Using the row major or column major version of these methods,
-    i.e. [`get_row_major`], [`get_mut_row_major`], [`set_row_major`],
-    [`get_column_major`], [`get_mut_column_major`],
-    [`set_column_major`]. These perform the same tasks as the non row/column
-    major methods, but take one index instead of two.
+### Accessing data from an [`Vecgrid`]
 
-[`Array2D`] also supports several forms of iteration. You can iterate
+[`Vecgrid`] supports several forms of indexing:
+
+- Using the indexing syntax (square brackets) with a tuple of [`(usize,
+  usize)`], which panics on out-of-bounds accesses.
+- Using the [`get`], [`get_mut`], and [`set`] methods, which return an
+  [`Option`] or a [`Result`] on out-of-bounds accesses.
+- Using the row major or column major version of these methods,
+  i.e. [`get_row_major`], [`get_mut_row_major`], [`set_row_major`],
+  [`get_column_major`], [`get_mut_column_major`],
+  [`set_column_major`]. These perform the same tasks as the non row/column
+  major methods, but take one index instead of two.
+
+[`Vecgrid`] also supports several forms of iteration. You can iterate
 through:
-  - All of the elements, in either [row major or column major order] (see
-    [`elements_row_major_iter`] and [`elements_column_major_iter`]).
-  - All of the elements as mutable references, in [row major or column major order] (see
-    [`elements_row_major_iter_mut`] and [`elements_column_major_iter_mut`]).
-  - Individual rows or columns (see [`row_iter`] and [`column_iter`]).
-  - Individual rows and columns of mutable entries (see [`row_iter_mut`] and [`column_iter_mut`]).
-  - All rows or all columns (see [`rows_iter`] and [`columns_iter`]).
-  - All rows or all columns of mutable entries (see [`rows_iter_mut`] and [`columns_iter_mut`]).
 
+- All of the elements, in either [row major or column major order] (see
+  [`elements_row_major_iter`] and [`elements_column_major_iter`]).
+- All of the elements as mutable references, in [row major or column major order] (see
+  [`elements_row_major_iter_mut`] and [`elements_column_major_iter_mut`]).
+- Individual rows or columns (see [`row_iter`] and [`column_iter`]).
+- Individual rows and columns of mutable entries (see [`row_iter_mut`] and [`column_iter_mut`]).
+- All rows or all columns (see [`rows_iter`] and [`columns_iter`]).
+- All rows or all columns of mutable entries (see [`rows_iter_mut`] and [`columns_iter_mut`]).
 
-### Extracting all data from an [`Array2D`]
+### Extracting all data from an [`Vecgrid`]
 
-An [`Array2D`] can be converted back into a [`Vec`] through several
+An [`Vecgrid`] can be converted back into a [`Vec`] through several
 methods. You can extract the data as:
-  - A [`Vec`] of rows or columns (see [`as_rows`] and [`as_columns`]).
-  - A "flat" [`Vec`] of elements in either [row major or column major order]
-    (see [`as_row_major`] and [`as_column_major`]).
+
+- A [`Vec`] of rows or columns (see [`as_rows`] and [`as_columns`]).
+- A "flat" [`Vec`] of elements in either [row major or column major order]
+  (see [`as_row_major`] and [`as_column_major`]).
 
 ## Examples
 
 ```rust
-use array2d::{Array2D, Error};
+use vecgrid::{Vecgrid, Error};
 
 pub fn main() -> Result<(), Error> {
-    // Create an array filled with the same element.
-    let prefilled = Array2D::filled_with(42, 2, 3);
+    // Create an vecgrid filled with the same element.
+    let prefilled = Vecgrid::filled_with(42, 2, 3);
     assert_eq!(prefilled.num_rows(), 2);
     assert_eq!(prefilled.num_columns(), 3);
     assert_eq!(prefilled[(0, 0)], 42);
 
-    // Create an array from the given rows. You can also use columns
+    // Create an vecgrid from the given rows. You can also use columns
     // with the `columns` function
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let from_rows = Array2D::from_rows(&rows)?;
+    let from_rows = Vecgrid::from_rows(&rows)?;
     assert_eq!(from_rows.num_rows(), 2);
     assert_eq!(from_rows.num_columns(), 3);
     assert_eq!(from_rows[(1, 1)], 5);
 
-    // Create an array from a flat Vec of elements in row major or
+    // Create an vecgrid from a flat Vec of elements in row major or
     // column major order.
     let column_major = vec![1, 4, 2, 5, 3, 6];
     let from_column_major =
-        Array2D::from_column_major(&column_major, 2, 3)?;
+        Vecgrid::from_column_major(&column_major, 2, 3)?;
     assert_eq!(from_column_major.num_rows(), 2);
     assert_eq!(from_column_major.num_columns(), 3);
     assert_eq!(from_column_major[(1, 1)], 5);
@@ -92,31 +95,31 @@ pub fn main() -> Result<(), Error> {
     // Implements `Eq` if the element type does.
     assert_eq!(from_rows, from_column_major);
 
-    // Index into an array using a tuple of usize to access or alter
-    // the array.
+    // Index into an vecgrid using a tuple of usize to access or alter
+    // the vecgrid.
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let mut array = Array2D::from_rows(&rows)?;
-    array[(1, 1)] = 100;
+    let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    vecgrid[(1, 1)] = 100;
 
-    // Convert the array back into a nested Vec using `as_rows` or
+    // Convert the vecgrid back into a nested Vec using `as_rows` or
     // `as_columns`.
-    let array_rows = array.as_rows();
-    assert_eq!(array_rows, vec![vec![1, 2, 3], vec![4, 100, 6]]);
+    let vecgrid_rows = vecgrid.as_rows();
+    assert_eq!(vecgrid_rows, vec![vec![1, 2, 3], vec![4, 100, 6]]);
 
-    // Convert the array back into a flat Vec using `as_row_major` or
+    // Convert the vecgrid back into a flat Vec using `as_row_major` or
     // `as_column_major`.
-    let array_column_major = array.as_column_major();
-    assert_eq!(array_column_major, vec![1, 4, 2, 100, 3, 6]);
+    let vecgrid_column_major = vecgrid.as_column_major();
+    assert_eq!(vecgrid_column_major, vec![1, 4, 2, 100, 3, 6]);
 
     // Iterate over a single row or column
     println!("First column:");
-    for element in array.column_iter(0)? {
+    for element in vecgrid.column_iter(0)? {
         println!("{}", element);
     }
 
     // Iterate over all rows or columns.
     println!("All elements:");
-    for row_iter in array.rows_iter() {
+    for row_iter in vecgrid.rows_iter() {
         for element in row_iter {
             print!("{} ", element);
         }
@@ -128,38 +131,38 @@ pub fn main() -> Result<(), Error> {
 
 ```
 
-[`Array2D`]: struct.Array2D.html
-[`from_rows`]: struct.Array2D.html#method.from_rows
-[`from_columns`]: struct.Array2D.html#method.from_columns
-[`from_row_major`]: struct.Array2D.html#method.from_row_major
-[`from_column_major`]: struct.Array2D.html#method.from_column_major
-[`filled_with`]: struct.Array2D.html#method.filled_with
-[`filled_by_row_major`]: struct.Array2D.html#method.filled_by_row_major
-[`filled_by_column_major`]: struct.Array2D.html#method.filled_by_column_major
-[`from_iter_row_major`]: struct.Array2D.html#method.from_iter_row_major
-[`from_iter_column_major`]: struct.Array2D.html#method.from_iter_column_major
-[`get`]: struct.Array2D.html#method.get
-[`get_mut`]: struct.Array2D.html#method.get_mut
-[`set`]: struct.Array2D.html#method.set
-[`elements_row_major_iter`]: struct.Array2D.html#method.elements_row_major_iter
-[`elements_column_major_iter`]: struct.Array2D.html#method.elements_column_major_iter
-[`elements_row_major_iter_mut`]: struct.Array2D.html#method.elements_row_major_iter_mut
-[`elements_column_major_iter_mut`]: struct.Array2D.html#method.elements_column_major_iter_mut
-[`row_iter`]: struct.Array2D.html#method.row_iter
-[`column_iter`]: struct.Array2D.html#method.column_iter
-[`row_iter_mut`]: struct.Array2D.html#method.row_iter_mut
-[`column_iter_mut`]: struct.Array2D.html#method.column_iter_mut
-[`rows_iter`]: struct.Array2D.html#method.rows_iter
-[`columns_iter`]: struct.Array2D.html#method.columns_iter
-[`rows_iter_mut`]: struct.Array2D.html#method.rows_iter_mut
-[`columns_iter_mut`]: struct.Array2D.html#method.columns_iter_mut
-[`as_rows`]: struct.Array2D.html#method.as_rows
-[`as_columns`]: struct.Array2D.html#method.as_columns
-[`as_row_major`]: struct.Array2D.html#method.as_row_major
-[`as_column_major`]: struct.Array2D.html#method.as_column_major
-[`Vec`]: https://doc.rust-lang.org/std/vec/struct.Vec.html
-[`Option`]: https://doc.rust-lang.org/std/option/
-[`Result`]: https://doc.rust-lang.org/std/result/
+[`vecgrid`]: struct.Vecgrid.html
+[`from_rows`]: struct.Vecgrid.html#method.from_rows
+[`from_columns`]: struct.Vecgrid.html#method.from_columns
+[`from_row_major`]: struct.Vecgrid.html#method.from_row_major
+[`from_column_major`]: struct.Vecgrid.html#method.from_column_major
+[`filled_with`]: struct.Vecgrid.html#method.filled_with
+[`filled_by_row_major`]: struct.Vecgrid.html#method.filled_by_row_major
+[`filled_by_column_major`]: struct.Vecgrid.html#method.filled_by_column_major
+[`from_iter_row_major`]: struct.Vecgrid.html#method.from_iter_row_major
+[`from_iter_column_major`]: struct.Vecgrid.html#method.from_iter_column_major
+[`get`]: struct.Vecgrid.html#method.get
+[`get_mut`]: struct.Vecgrid.html#method.get_mut
+[`set`]: struct.Vecgrid.html#method.set
+[`elements_row_major_iter`]: struct.Vecgrid.html#method.elements_row_major_iter
+[`elements_column_major_iter`]: struct.Vecgrid.html#method.elements_column_major_iter
+[`elements_row_major_iter_mut`]: struct.Vecgrid.html#method.elements_row_major_iter_mut
+[`elements_column_major_iter_mut`]: struct.Vecgrid.html#method.elements_column_major_iter_mut
+[`row_iter`]: struct.Vecgrid.html#method.row_iter
+[`column_iter`]: struct.Vecgrid.html#method.column_iter
+[`row_iter_mut`]: struct.Vecgrid.html#method.row_iter_mut
+[`column_iter_mut`]: struct.Vecgrid.html#method.column_iter_mut
+[`rows_iter`]: struct.Vecgrid.html#method.rows_iter
+[`columns_iter`]: struct.Vecgrid.html#method.columns_iter
+[`rows_iter_mut`]: struct.Vecgrid.html#method.rows_iter_mut
+[`columns_iter_mut`]: struct.Vecgrid.html#method.columns_iter_mut
+[`as_rows`]: struct.Vecgrid.html#method.as_rows
+[`as_columns`]: struct.Vecgrid.html#method.as_columns
+[`as_row_major`]: struct.Vecgrid.html#method.as_row_major
+[`as_column_major`]: struct.Vecgrid.html#method.as_column_major
+[`vec`]: https://doc.rust-lang.org/std/vec/struct.Vec.html
+[`option`]: https://doc.rust-lang.org/std/option/
+[`result`]: https://doc.rust-lang.org/std/result/
 [`(usize, usize)`]: https://doc.rust-lang.org/std/primitive.usize.html
 [row major or column major order]: https://en.wikipedia.org/wiki/Row-_and_column-major_order
 

@@ -1,16 +1,16 @@
-//! Array2D provides a fixed sized two-dimensional array. It is more efficient
+//! Vecgrid provides a dynamically sized two-dimensional vec. It is more efficient
 //! and is easier to use than a vector of vectors, i.e. `Vec<Vec<T>>`.
 //!
 //! This is beneficial when using a grid-like structure, which is common in
-//! image processing, game boards, and other situations. Array2D cannot be used
+//! image processing, game boards, and other situations. Vecgrid cannot be used
 //! when rows or columns might have different lengths⁠—all rows and columns must
 //! be the same length.
 //!
-//! # How to use [`Array2D`]
+//! # How to use [`Vecgrid`]
 //!
-//! ## Creating an [`Array2D`]
+//! ## Creating an [`Vecgrid`]
 //!
-//! An [`Array2D`] can be created in many different ways. These include:
+//! An [`Vecgrid`] can be created in many different ways. These include:
 //!   - Providing the rows or the columns, which must all be the same size (see
 //!     [`from_rows`] and [`from_columns`]).
 //!   - Providing a "flat" slice of elements in either [row major or column
@@ -20,14 +20,14 @@
 //!   - Providing a value to repeatedly put in every location (see
 //!     [`filled_with`]).
 //!   - Providing a generator function that is repeatedly called to produce
-//!     values to fill the array (see [`filled_by_row_major`] and
+//!     values to fill the vecgrid (see [`filled_by_row_major`] and
 //!     [`filled_by_column_major`]).
-//!   - Providing an iterator that is used to produce values to fill the array
+//!   - Providing an iterator that is used to produce values to fill the vecgrid
 //!     (see [`from_iter_row_major`] and [`from_iter_column_major`]).
 //!
-//! ## Accessing data from an [`Array2D`]
+//! ## Accessing data from an [`Vecgrid`]
 //!
-//! [`Array2D`] supports several forms of indexing:
+//! [`Vecgrid`] supports several forms of indexing:
 //!   - Using the indexing syntax (square brackets) with a tuple of [`(usize,
 //!     usize)`], which panics on out-of-bounds accesses.
 //!   - Using the [`get`], [`get_mut`], and [`set`] methods, which return an
@@ -38,7 +38,7 @@
 //!     [`set_column_major`]. These perform the same tasks as the non row/column
 //!     major methods, but take one index instead of two.
 //!
-//! [`Array2D`] also supports several forms of iteration. You can iterate
+//! [`Vecgrid`] also supports several forms of iteration. You can iterate
 //! through:
 //!   - All of the elements, in either [row major or column major order] (see
 //!     [`elements_row_major_iter`] and [`elements_column_major_iter`]).
@@ -50,9 +50,9 @@
 //!   - All rows or all columns of mutable entries (see [`rows_iter_mut`] and [`columns_iter_mut`]).
 //!
 //!
-//! ## Extracting all data from an [`Array2D`]
+//! ## Extracting all data from an [`Vecgrid`]
 //!
-//! An [`Array2D`] can be converted back into a [`Vec`] through several
+//! An [`Vecgrid`] can be converted back into a [`Vec`] through several
 //! methods. You can extract the data as:
 //!   - A [`Vec`] of rows or columns (see [`as_rows`] and [`as_columns`]).
 //!   - A "flat" [`Vec`] of elements in either [row major or column major order]
@@ -61,28 +61,28 @@
 //! # Examples
 //!
 //! ```rust
-//! use array2d::{Array2D, Error};
+//! use vecgrid::{Vecgrid, Error};
 //!
 //! pub fn main() -> Result<(), Error> {
-//!     // Create an array filled with the same element.
-//!     let prefilled = Array2D::filled_with(42, 2, 3);
+//!     // Create a vecgrid filled with the same element.
+//!     let prefilled = Vecgrid::filled_with(42, 2, 3);
 //!     assert_eq!(prefilled.num_rows(), 2);
 //!     assert_eq!(prefilled.num_columns(), 3);
 //!     assert_eq!(prefilled[(0, 0)], 42);
 //!
-//!     // Create an array from the given rows. You can also use columns
+//!     // Create a vecgrid from the given rows. You can also use columns
 //!     // with the `columns` function
 //!     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-//!     let from_rows = Array2D::from_rows(&rows)?;
+//!     let from_rows = Vecgrid::from_rows(&rows)?;
 //!     assert_eq!(from_rows.num_rows(), 2);
 //!     assert_eq!(from_rows.num_columns(), 3);
 //!     assert_eq!(from_rows[(1, 1)], 5);
 //!
-//!     // Create an array from a flat Vec of elements in row major or
+//!     // Create a vecgrid from a flat Vec of elements in row major or
 //!     // column major order.
 //!     let column_major = vec![1, 4, 2, 5, 3, 6];
 //!     let from_column_major =
-//!         Array2D::from_column_major(&column_major, 2, 3)?;
+//!         Vecgrid::from_column_major(&column_major, 2, 3)?;
 //!     assert_eq!(from_column_major.num_rows(), 2);
 //!     assert_eq!(from_column_major.num_columns(), 3);
 //!     assert_eq!(from_column_major[(1, 1)], 5);
@@ -90,31 +90,31 @@
 //!     // Implements `Eq` if the element type does.
 //!     assert_eq!(from_rows, from_column_major);
 //!
-//!     // Index into an array using a tuple of usize to access or alter
-//!     // the array.
+//!     // Index into a vecgrid using a tuple of usize to access or alter
+//!     // the vecgrid.
 //!     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-//!     let mut array = Array2D::from_rows(&rows)?;
-//!     array[(1, 1)] = 100;
+//!     let mut vecgrid = Vecgrid::from_rows(&rows)?;
+//!     vecgrid[(1, 1)] = 100;
 //!
-//!     // Convert the array back into a nested Vec using `as_rows` or
+//!     // Convert the vecgrid back into a nested Vec using `as_rows` or
 //!     // `as_columns`.
-//!     let array_rows = array.as_rows();
-//!     assert_eq!(array_rows, vec![vec![1, 2, 3], vec![4, 100, 6]]);
+//!     let vecgrid_rows = vecgrid.as_rows();
+//!     assert_eq!(vecgrid_rows, vec![vec![1, 2, 3], vec![4, 100, 6]]);
 //!
-//!     // Convert the array back into a flat Vec using `as_row_major` or
+//!     // Convert the vecgrid back into a flat Vec using `as_row_major` or
 //!     // `as_column_major`.
-//!     let array_column_major = array.as_column_major();
-//!     assert_eq!(array_column_major, vec![1, 4, 2, 100, 3, 6]);
+//!     let vecgrid_column_major = vecgrid.as_column_major();
+//!     assert_eq!(vecgrid_column_major, vec![1, 4, 2, 100, 3, 6]);
 //!
 //!     // Iterate over a single row or column
 //!     println!("First column:");
-//!     for element in array.column_iter(0)? {
+//!     for element in vecgrid.column_iter(0)? {
 //!         println!("{}", element);
 //!     }
 //!
 //!     // Iterate over all rows or columns.
 //!     println!("All elements:");
-//!     for row_iter in array.rows_iter() {
+//!     for row_iter in vecgrid.rows_iter() {
 //!         for element in row_iter {
 //!             print!("{} ", element);
 //!         }
@@ -125,41 +125,41 @@
 //! }
 //! ```
 //!
-//! [`Array2D`]: struct.Array2D.html
-//! [`from_rows`]: struct.Array2D.html#method.from_rows
-//! [`from_columns`]: struct.Array2D.html#method.from_columns
-//! [`from_row_major`]: struct.Array2D.html#method.from_row_major
-//! [`from_column_major`]: struct.Array2D.html#method.from_column_major
-//! [`filled_with`]: struct.Array2D.html#method.filled_with
-//! [`filled_by_row_major`]: struct.Array2D.html#method.filled_by_row_major
-//! [`filled_by_column_major`]: struct.Array2D.html#method.filled_by_column_major
-//! [`from_iter_row_major`]: struct.Array2D.html#method.from_iter_row_major
-//! [`from_iter_column_major`]: struct.Array2D.html#method.from_iter_column_major
-//! [`get`]: struct.Array2D.html#method.get
-//! [`get_mut`]: struct.Array2D.html#method.get_mut
-//! [`set`]: struct.Array2D.html#method.set
-//! [`get_row_major`]: struct.Array2D.html#method.get_row_major
-//! [`get_mut_row_major`]: struct.Array2D.html#method.get_mut_row_major
-//! [`set_row_major`]: struct.Array2D.html#method.set_row_major
-//! [`get_column_major`]: struct.Array2D.html#method.get_column_major
-//! [`get_mut_column_major`]: struct.Array2D.html#method.get_mut_column_major
-//! [`set_column_major`]: struct.Array2D.html#method.set_column_major
-//! [`elements_row_major_iter`]: struct.Array2D.html#method.elements_row_major_iter
-//! [`elements_column_major_iter`]: struct.Array2D.html#method.elements_column_major_iter
-//! [`elements_row_major_iter_mut`]: struct.Array2D.html#method.elements_row_major_iter_mut
-//! [`elements_column_major_iter_mut`]: struct.Array2D.html#method.elements_column_major_iter_mut
-//! [`row_iter`]: struct.Array2D.html#method.row_iter
-//! [`column_iter`]: struct.Array2D.html#method.column_iter
-//! [`row_iter_mut`]: struct.Array2D.html#method.row_iter_mut
-//! [`column_iter_mut`]: struct.Array2D.html#method.column_iter_mut
-//! [`rows_iter`]: struct.Array2D.html#method.rows_iter
-//! [`columns_iter`]: struct.Array2D.html#method.columns_iter
-//! [`rows_iter_mut`]: struct.Array2D.html#method.rows_iter_mut
-//! [`columns_iter_mut`]: struct.Array2D.html#method.columns_iter_mut
-//! [`as_rows`]: struct.Array2D.html#method.as_rows
-//! [`as_columns`]: struct.Array2D.html#method.as_columns
-//! [`as_row_major`]: struct.Array2D.html#method.as_row_major
-//! [`as_column_major`]: struct.Array2D.html#method.as_column_major
+//! [`Vecgrid`]: struct.Vecgrid.html
+//! [`from_rows`]: struct.Vecgrid.html#method.from_rows
+//! [`from_columns`]: struct.Vecgrid.html#method.from_columns
+//! [`from_row_major`]: struct.Vecgrid.html#method.from_row_major
+//! [`from_column_major`]: struct.Vecgrid.html#method.from_column_major
+//! [`filled_with`]: struct.Vecgrid.html#method.filled_with
+//! [`filled_by_row_major`]: struct.Vecgrid.html#method.filled_by_row_major
+//! [`filled_by_column_major`]: struct.Vecgrid.html#method.filled_by_column_major
+//! [`from_iter_row_major`]: struct.Vecgrid.html#method.from_iter_row_major
+//! [`from_iter_column_major`]: struct.Vecgrid.html#method.from_iter_column_major
+//! [`get`]: struct.Vecgrid.html#method.get
+//! [`get_mut`]: struct.Vecgrid.html#method.get_mut
+//! [`set`]: struct.Vecgrid.html#method.set
+//! [`get_row_major`]: struct.Vecgrid.html#method.get_row_major
+//! [`get_mut_row_major`]: struct.Vecgrid.html#method.get_mut_row_major
+//! [`set_row_major`]: struct.Vecgrid.html#method.set_row_major
+//! [`get_column_major`]: struct.Vecgrid.html#method.get_column_major
+//! [`get_mut_column_major`]: struct.Vecgrid.html#method.get_mut_column_major
+//! [`set_column_major`]: struct.Vecgrid.html#method.set_column_major
+//! [`elements_row_major_iter`]: struct.Vecgrid.html#method.elements_row_major_iter
+//! [`elements_column_major_iter`]: struct.Vecgrid.html#method.elements_column_major_iter
+//! [`elements_row_major_iter_mut`]: struct.Vecgrid.html#method.elements_row_major_iter_mut
+//! [`elements_column_major_iter_mut`]: struct.Vecgrid.html#method.elements_column_major_iter_mut
+//! [`row_iter`]: struct.Vecgrid.html#method.row_iter
+//! [`column_iter`]: struct.Vecgrid.html#method.column_iter
+//! [`row_iter_mut`]: struct.Vecgrid.html#method.row_iter_mut
+//! [`column_iter_mut`]: struct.Vecgrid.html#method.column_iter_mut
+//! [`rows_iter`]: struct.Vecgrid.html#method.rows_iter
+//! [`columns_iter`]: struct.Vecgrid.html#method.columns_iter
+//! [`rows_iter_mut`]: struct.Vecgrid.html#method.rows_iter_mut
+//! [`columns_iter_mut`]: struct.Vecgrid.html#method.columns_iter_mut
+//! [`as_rows`]: struct.Vecgrid.html#method.as_rows
+//! [`as_columns`]: struct.Vecgrid.html#method.as_columns
+//! [`as_row_major`]: struct.Vecgrid.html#method.as_row_major
+//! [`as_column_major`]: struct.Vecgrid.html#method.as_column_major
 //! [`Vec`]: https://doc.rust-lang.org/std/vec/struct.Vec.html
 //! [`Option`]: https://doc.rust-lang.org/std/option/
 //! [`Result`]: https://doc.rust-lang.org/std/result/
@@ -173,18 +173,18 @@ use std::ops::{Index, IndexMut};
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
-/// A fixed sized two-dimensional array.
+/// A dynamically sized two-dimensional vec.
 #[derive(Debug, Clone, Eq, PartialEq, Hash)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
-pub struct Array2D<T> {
-    array: Vec<T>,
+pub struct Vecgrid<T> {
+    vecgrid: Vec<T>,
     num_rows: usize,
     num_columns: usize,
 }
 
-/// An error that can arise during the use of an [`Array2D`].
+/// An error that can arise during the use of an [`Vecgrid`].
 ///
-/// [`Array2D`]: struct.Array2D.html
+/// [`Vecgrid`]: struct.Vecgrid.html
 #[derive(Debug, Eq, PartialEq)]
 pub enum Error {
     /// The given indices were out of bounds.
@@ -193,12 +193,12 @@ pub enum Error {
     IndexOutOfBounds(usize),
     /// The dimensions given did not match the elements provided
     DimensionMismatch,
-    /// There were not enough elements to fill the array.
+    /// There were not enough elements to fill the vecgrid.
     NotEnoughElements,
 }
 
-impl<T> Array2D<T> {
-    /// Creates a new [`Array2D`] from a slice of rows, each of which is a
+impl<T> Vecgrid<T> {
+    /// Creates a new [`Vecgrid`] from a slice of rows, each of which is a
     /// [`Vec`] of elements.
     ///
     /// Returns an error if the rows are not all the same size.
@@ -206,17 +206,17 @@ impl<T> Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    /// let array = Array2D::from_rows(&rows)?;
-    /// assert_eq!(array[(1, 2)], 6);
-    /// assert_eq!(array.as_rows(), rows);
+    /// let vecgrid = Vecgrid::from_rows(&rows)?;
+    /// assert_eq!(vecgrid[(1, 2)], 6);
+    /// assert_eq!(vecgrid.as_rows(), rows);
     /// # Ok(())
     /// # }
     /// ```
     ///
-    /// [`Array2D`]: struct.Array2D.html
+    /// [`Vecgrid`]: struct.Vecgrid.html
     /// [`Vec`]: https://doc.rust-lang.org/std/vec/struct.Vec.html
     pub fn from_rows(elements: &[Vec<T>]) -> Result<Self, Error>
     where
@@ -226,14 +226,14 @@ impl<T> Array2D<T> {
         if !elements.iter().all(|row| row.len() == row_len) {
             return Err(Error::DimensionMismatch);
         }
-        Ok(Array2D {
-            array: flatten(elements),
+        Ok(Vecgrid {
+            vecgrid: flatten(elements),
             num_rows: elements.len(),
             num_columns: row_len,
         })
     }
 
-    /// Creates a new [`Array2D`] from a slice of columns, each of which
+    /// Creates a new [`Vecgrid`] from a slice of columns, each of which
     /// contains a [`Vec`] of elements.
     ///
     /// Returns an error if the columns are not all the same size.
@@ -241,17 +241,17 @@ impl<T> Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let columns = vec![vec![1, 4], vec![2, 5], vec![3, 6]];
-    /// let array = Array2D::from_columns(&columns)?;
-    /// assert_eq!(array[(1, 2)], 6);
-    /// assert_eq!(array.as_rows(), vec![vec![1, 2, 3], vec![4, 5, 6]]);
+    /// let vecgrid = Vecgrid::from_columns(&columns)?;
+    /// assert_eq!(vecgrid[(1, 2)], 6);
+    /// assert_eq!(vecgrid.as_rows(), vec![vec![1, 2, 3], vec![4, 5, 6]]);
     /// # Ok(())
     /// # }
     /// ```
     ///
-    /// [`Array2D`]: struct.Array2D.html
+    /// [`Vecgrid`]: struct.Vecgrid.html
     /// [`Vec`]: https://doc.rust-lang.org/std/vec/struct.Vec.html
     pub fn from_columns(elements: &[Vec<T>]) -> Result<Self, Error>
     where
@@ -263,17 +263,17 @@ impl<T> Array2D<T> {
         }
         let num_rows = column_len;
         let num_columns = elements.len();
-        let array = indices_row_major(num_rows, num_columns)
+        let vecgrid = indices_row_major(num_rows, num_columns)
             .map(|(row, column)| elements[column][row].clone())
             .collect();
-        Ok(Array2D {
-            array,
+        Ok(Vecgrid {
+            vecgrid,
             num_rows,
             num_columns,
         })
     }
 
-    /// Creates a new [`Array2D`] from the given flat slice in [row major
+    /// Creates a new [`Vecgrid`] from the given flat slice in [row major
     /// order].
     ///
     /// Returns an error if the number of elements in `elements` is not the
@@ -283,17 +283,17 @@ impl<T> Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let row_major = vec![1, 2, 3, 4, 5, 6];
-    /// let array = Array2D::from_row_major(&row_major, 2, 3)?;
-    /// assert_eq!(array[(1, 2)], 6);
-    /// assert_eq!(array.as_rows(), vec![vec![1, 2, 3], vec![4, 5, 6]]);
+    /// let vecgrid = Vecgrid::from_row_major(&row_major, 2, 3)?;
+    /// assert_eq!(vecgrid[(1, 2)], 6);
+    /// assert_eq!(vecgrid.as_rows(), vec![vec![1, 2, 3], vec![4, 5, 6]]);
     /// # Ok(())
     /// # }
     /// ```
     ///
-    /// [`Array2D`]: struct.Array2D.html
+    /// [`Vecgrid`]: struct.Vecgrid.html
     /// [row major order]: https://en.wikipedia.org/wiki/Row-_and_column-major_order
     pub fn from_row_major(
         elements: &[T],
@@ -307,14 +307,14 @@ impl<T> Array2D<T> {
         if total_len != elements.len() {
             return Err(Error::DimensionMismatch);
         }
-        Ok(Array2D {
-            array: elements.to_vec(),
+        Ok(Vecgrid {
+            vecgrid: elements.to_vec(),
             num_rows,
             num_columns,
         })
     }
 
-    /// Creates a new [`Array2D`] from the given flat slice in [column major
+    /// Creates a new [`Vecgrid`] from the given flat slice in [column major
     /// order].
     ///
     /// Return an error if the number of elements in `elements` is not the
@@ -324,17 +324,17 @@ impl<T> Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let column_major = vec![1, 4, 2, 5, 3, 6];
-    /// let array = Array2D::from_column_major(&column_major, 2, 3)?;
-    /// assert_eq!(array[(1, 2)], 6);
-    /// assert_eq!(array.as_rows(), vec![vec![1, 2, 3], vec![4, 5, 6]]);
+    /// let vecgrid = Vecgrid::from_column_major(&column_major, 2, 3)?;
+    /// assert_eq!(vecgrid[(1, 2)], 6);
+    /// assert_eq!(vecgrid.as_rows(), vec![vec![1, 2, 3], vec![4, 5, 6]]);
     /// # Ok(())
     /// # }
     /// ```
     ///
-    /// [`Array2D`]: struct.Array2D.html
+    /// [`Vecgrid`]: struct.Vecgrid.html
     /// [column major order]: https://en.wikipedia.org/wiki/Row-_and_column-major_order
     pub fn from_column_major(
         elements: &[T],
@@ -350,39 +350,39 @@ impl<T> Array2D<T> {
         }
         let indices_row_major =
             (0..num_rows).flat_map(move |row| (0..num_columns).map(move |column| (row, column)));
-        let array = indices_row_major
+        let vecgrid = indices_row_major
             .map(|(row, column)| {
                 let index = column * num_rows + row;
                 elements[index].clone()
             })
             .collect();
-        Ok(Array2D {
-            array,
+        Ok(Vecgrid {
+            vecgrid,
             num_rows,
             num_columns,
         })
     }
 
-    /// Creates a new [`Array2D`] with the specified number of rows and columns
+    /// Creates a new [`Vecgrid`] with the specified number of rows and columns
     /// that contains `element` in every location.
     ///
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
-    /// let array = Array2D::filled_with(42, 2, 3);
-    /// assert_eq!(array.as_rows(), vec![vec![42, 42, 42], vec![42, 42, 42]]);
+    /// # use vecgrid::{Vecgrid, Error};
+    /// let vecgrid = Vecgrid::filled_with(42, 2, 3);
+    /// assert_eq!(vecgrid.as_rows(), vec![vec![42, 42, 42], vec![42, 42, 42]]);
     /// ```
     ///
-    /// [`Array2D`]: struct.Array2D.html
+    /// [`Vecgrid`]: struct.Vecgrid.html
     pub fn filled_with(element: T, num_rows: usize, num_columns: usize) -> Self
     where
         T: Clone,
     {
         let total_len = num_rows * num_columns;
-        let array = vec![element; total_len];
-        Array2D {
-            array,
+        let vecgrid = vec![element; total_len];
+        Vecgrid {
+            vecgrid,
             num_rows,
             num_columns,
         }
@@ -394,10 +394,10 @@ impl<T> Array2D<T> {
     where
         T: Clone,
     {
-        Array2D::filled_with(element, num_rows, num_columns)
+        Vecgrid::filled_with(element, num_rows, num_columns)
     }
 
-    /// Creates a new [`Array2D`] with the specified number of rows and columns
+    /// Creates a new [`Vecgrid`] with the specified number of rows and columns
     /// and fills each element with the result of calling the given
     /// function. The function is called once for every location going in
     /// row major order.
@@ -405,32 +405,32 @@ impl<T> Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// let mut counter = 1;
     /// let increment = || {
     ///     let tmp = counter;
     ///     counter += 1;
     ///     tmp
     /// };
-    /// let array = Array2D::filled_by_row_major(increment, 2, 3);
-    /// assert_eq!(array.as_rows(), vec![vec![1, 2, 3], vec![4, 5, 6]]);
+    /// let vecgrid = Vecgrid::filled_by_row_major(increment, 2, 3);
+    /// assert_eq!(vecgrid.as_rows(), vec![vec![1, 2, 3], vec![4, 5, 6]]);
     /// ```
     ///
-    /// [`Array2D`]: struct.Array2D.html
+    /// [`Vecgrid`]: struct.Vecgrid.html
     pub fn filled_by_row_major<F>(mut generator: F, num_rows: usize, num_columns: usize) -> Self
     where
         F: FnMut() -> T,
     {
         let total_len = num_rows * num_columns;
-        let array = (0..total_len).map(|_| generator()).collect();
-        Array2D {
-            array,
+        let vecgrid = (0..total_len).map(|_| generator()).collect();
+        Vecgrid {
+            vecgrid,
             num_rows,
             num_columns,
         }
     }
 
-    /// Creates a new [`Array2D`] with the specified number of rows and columns
+    /// Creates a new [`Vecgrid`] with the specified number of rows and columns
     /// and fills each element with the result of calling the given
     /// function. The function is called once for every location going in
     /// column major order.
@@ -438,50 +438,50 @@ impl<T> Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// let mut counter = 1;
     /// let increment = || {
     ///     let tmp = counter;
     ///     counter += 1;
     ///     tmp
     /// };
-    /// let array = Array2D::filled_by_column_major(increment, 2, 3);
-    /// assert_eq!(array.as_columns(), vec![vec![1, 2], vec![3, 4], vec![5, 6]]);
+    /// let vecgrid = Vecgrid::filled_by_column_major(increment, 2, 3);
+    /// assert_eq!(vecgrid.as_columns(), vec![vec![1, 2], vec![3, 4], vec![5, 6]]);
     /// ```
     ///
-    /// [`Array2D`]: struct.Array2D.html
+    /// [`Vecgrid`]: struct.Vecgrid.html
     pub fn filled_by_column_major<F>(mut generator: F, num_rows: usize, num_columns: usize) -> Self
     where
         F: FnMut() -> T,
         T: Clone,
     {
         let total_len = num_rows * num_columns;
-        let array_column_major = (0..total_len).map(|_| generator()).collect::<Vec<_>>();
-        Array2D::from_column_major(&array_column_major, num_rows, num_columns)
+        let vecgrid_column_major = (0..total_len).map(|_| generator()).collect::<Vec<_>>();
+        Vecgrid::from_column_major(&vecgrid_column_major, num_rows, num_columns)
             .expect("Filled by should never fail")
     }
 
-    /// Creates a new [`Array2D`] with the specified number of rows and columns
+    /// Creates a new [`Vecgrid`] with the specified number of rows and columns
     /// and fills each element with the elements produced from the provided
     /// iterator. If the iterator produces more than enough elements, the
     /// remaining are unused. Returns an error if the iterator does not produce
     /// enough elements.
     ///
-    /// The elements are inserted into the array in [row major order].
+    /// The elements are inserted into the vecgrid in [row major order].
     ///
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let iterator = (1..);
-    /// let array = Array2D::from_iter_row_major(iterator, 2, 3)?;
-    /// assert_eq!(array.as_rows(), vec![vec![1, 2, 3], vec![4, 5, 6]]);
+    /// let vecgrid = Vecgrid::from_iter_row_major(iterator, 2, 3)?;
+    /// assert_eq!(vecgrid.as_rows(), vec![vec![1, 2, 3], vec![4, 5, 6]]);
     /// # Ok(())
     /// # }
     /// ```
     ///
-    /// [`Array2D`]: struct.Array2D.html
+    /// [`Vecgrid`]: struct.Vecgrid.html
     /// [row major order]: https://en.wikipedia.org/wiki/Row-_and_column-major_order
     pub fn from_iter_row_major<I>(
         iterator: I,
@@ -492,38 +492,38 @@ impl<T> Array2D<T> {
         I: Iterator<Item = T>,
     {
         let total_len = num_rows * num_columns;
-        let array = iterator.take(total_len).collect::<Vec<_>>();
-        if array.len() != total_len {
+        let vecgrid = iterator.take(total_len).collect::<Vec<_>>();
+        if vecgrid.len() != total_len {
             return Err(Error::NotEnoughElements);
         }
-        Ok(Array2D {
-            array,
+        Ok(Vecgrid {
+            vecgrid,
             num_rows,
             num_columns,
         })
     }
 
-    /// Creates a new [`Array2D`] with the specified number of rows and columns
+    /// Creates a new [`Vecgrid`] with the specified number of rows and columns
     /// and fills each element with the elements produced from the provided
     /// iterator. If the iterator produces more than enough elements, the
     /// remaining are unused. Returns an error if the iterator does not produce
     /// enough elements.
     ///
-    /// The elements are inserted into the array in [column major order].
+    /// The elements are inserted into the vecgrid in [column major order].
     ///
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let iterator = (1..);
-    /// let array = Array2D::from_iter_column_major(iterator, 2, 3)?;
-    /// assert_eq!(array.as_rows(), vec![vec![1, 3, 5], vec![2, 4, 6]]);
+    /// let vecgrid = Vecgrid::from_iter_column_major(iterator, 2, 3)?;
+    /// assert_eq!(vecgrid.as_rows(), vec![vec![1, 3, 5], vec![2, 4, 6]]);
     /// # Ok(())
     /// # }
     /// ```
     ///
-    /// [`Array2D`]: struct.Array2D.html
+    /// [`Vecgrid`]: struct.Vecgrid.html
     /// [column major order]: https://en.wikipedia.org/wiki/Row-_and_column-major_order
     pub fn from_iter_column_major<I>(
         iterator: I,
@@ -535,8 +535,8 @@ impl<T> Array2D<T> {
         T: Clone,
     {
         let total_len = num_rows * num_columns;
-        let array_column_major = iterator.take(total_len).collect::<Vec<_>>();
-        Array2D::from_column_major(&array_column_major, num_rows, num_columns)
+        let vecgrid_column_major = iterator.take(total_len).collect::<Vec<_>>();
+        Vecgrid::from_column_major(&vecgrid_column_major, num_rows, num_columns)
             .map_err(|_| Error::NotEnoughElements)
     }
 
@@ -573,16 +573,17 @@ impl<T> Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
-    /// let array = Array2D::filled_with(42, 2, 3);
-    /// assert_eq!(array.get(0, 0), Some(&42));
-    /// assert_eq!(array.get(10, 10), None);
+    /// # use vecgrid::{Vecgrid, Error};
+    /// let vecgrid = Vecgrid::filled_with(42, 2, 3);
+    /// assert_eq!(vecgrid.get(0, 0), Some(&42));
+    /// assert_eq!(vecgrid.get(10, 10), None);
     /// ```
     ///
     /// [`Some`]: https://doc.rust-lang.org/std/option/enum.Option.html#variant.Some
     /// [`None`]: https://doc.rust-lang.org/std/option/enum.Option.html#variant.None
     pub fn get(&self, row: usize, column: usize) -> Option<&T> {
-        self.get_index(row, column).map(|index| &self.array[index])
+        self.get_index(row, column)
+            .map(|index| &self.vecgrid[index])
     }
 
     /// Returns a reference to the element at the given index in row major
@@ -591,20 +592,20 @@ impl<T> Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    /// let array = Array2D::from_rows(&rows)?;
-    /// assert_eq!(array.get_row_major(2), Some(&3));
-    /// assert_eq!(array.get_row_major(4), Some(&5));
-    /// assert_eq!(array.get_row_major(10), None);
+    /// let vecgrid = Vecgrid::from_rows(&rows)?;
+    /// assert_eq!(vecgrid.get_row_major(2), Some(&3));
+    /// assert_eq!(vecgrid.get_row_major(4), Some(&5));
+    /// assert_eq!(vecgrid.get_row_major(10), None);
     /// # Ok(())
     /// # }
     /// ```
     ///
     /// [`None`]: https://doc.rust-lang.org/std/option/enum.Option.html#variant.None
     pub fn get_row_major(&self, index: usize) -> Option<&T> {
-        self.array.get(index)
+        self.vecgrid.get(index)
     }
 
     /// Returns a reference to the element at the given index in column major
@@ -613,13 +614,13 @@ impl<T> Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    /// let array = Array2D::from_rows(&rows)?;
-    /// assert_eq!(array.get_column_major(2), Some(&2));
-    /// assert_eq!(array.get_column_major(4), Some(&3));
-    /// assert_eq!(array.get_column_major(10), None);
+    /// let vecgrid = Vecgrid::from_rows(&rows)?;
+    /// assert_eq!(vecgrid.get_column_major(2), Some(&2));
+    /// assert_eq!(vecgrid.get_column_major(4), Some(&3));
+    /// assert_eq!(vecgrid.get_column_major(10), None);
     /// # Ok(())
     /// # }
     /// ```
@@ -638,24 +639,24 @@ impl<T> Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
-    /// let mut array = Array2D::filled_with(42, 2, 3);
+    /// # use vecgrid::{Vecgrid, Error};
+    /// let mut vecgrid = Vecgrid::filled_with(42, 2, 3);
     ///
-    /// assert_eq!(array.get_mut(0, 0), Some(&mut 42));
-    /// assert_eq!(array.get_mut(10, 10), None);
+    /// assert_eq!(vecgrid.get_mut(0, 0), Some(&mut 42));
+    /// assert_eq!(vecgrid.get_mut(10, 10), None);
     ///
-    /// array.get_mut(0, 0).map(|x| *x = 100);
-    /// assert_eq!(array.get(0, 0), Some(&100));
+    /// vecgrid.get_mut(0, 0).map(|x| *x = 100);
+    /// assert_eq!(vecgrid.get(0, 0), Some(&100));
     ///
-    /// array.get_mut(10, 10).map(|x| *x = 200);
-    /// assert_eq!(array.get(10, 10), None);
+    /// vecgrid.get_mut(10, 10).map(|x| *x = 200);
+    /// assert_eq!(vecgrid.get(10, 10), None);
     /// ```
     ///
     /// [`Some`]: https://doc.rust-lang.org/std/option/enum.Option.html#variant.Some
     /// [`None`]: https://doc.rust-lang.org/std/option/enum.Option.html#variant.None
     pub fn get_mut(&mut self, row: usize, column: usize) -> Option<&mut T> {
         self.get_index(row, column)
-            .map(move |index| &mut self.array[index])
+            .map(move |index| &mut self.vecgrid[index])
     }
 
     /// Returns a mutable reference to the element at the given index in row
@@ -664,26 +665,26 @@ impl<T> Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    /// let mut array = Array2D::from_rows(&rows)?;
+    /// let mut vecgrid = Vecgrid::from_rows(&rows)?;
     ///
-    /// assert_eq!(array.get_mut_row_major(1), Some(&mut 2));
-    /// assert_eq!(array.get_mut_row_major(10), None);
+    /// assert_eq!(vecgrid.get_mut_row_major(1), Some(&mut 2));
+    /// assert_eq!(vecgrid.get_mut_row_major(10), None);
     ///
-    /// array.get_mut_row_major(3).map(|x| *x = 100);
-    /// assert_eq!(array.get(1, 0), Some(&100));
+    /// vecgrid.get_mut_row_major(3).map(|x| *x = 100);
+    /// assert_eq!(vecgrid.get(1, 0), Some(&100));
     ///
-    /// array.get_mut_row_major(10).map(|x| *x = 200);
-    /// assert_eq!(array.get(10, 10), None);
+    /// vecgrid.get_mut_row_major(10).map(|x| *x = 200);
+    /// assert_eq!(vecgrid.get(10, 10), None);
     /// # Ok(())
     /// # }
     /// ```
     ///
     /// [`None`]: https://doc.rust-lang.org/std/option/enum.Option.html#variant.None
     pub fn get_mut_row_major(&mut self, index: usize) -> Option<&mut T> {
-        self.array.get_mut(index)
+        self.vecgrid.get_mut(index)
     }
 
     /// Returns a mutable reference to the element at the given index in row
@@ -692,19 +693,19 @@ impl<T> Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    /// let mut array = Array2D::from_rows(&rows)?;
+    /// let mut vecgrid = Vecgrid::from_rows(&rows)?;
     ///
-    /// assert_eq!(array.get_mut_column_major(1), Some(&mut 4));
-    /// assert_eq!(array.get_mut_column_major(10), None);
+    /// assert_eq!(vecgrid.get_mut_column_major(1), Some(&mut 4));
+    /// assert_eq!(vecgrid.get_mut_column_major(10), None);
     ///
-    /// array.get_mut_column_major(4).map(|x| *x = 100);
-    /// assert_eq!(array.get(0, 2), Some(&100));
+    /// vecgrid.get_mut_column_major(4).map(|x| *x = 100);
+    /// assert_eq!(vecgrid.get(0, 2), Some(&100));
     ///
-    /// array.get_mut_column_major(10).map(|x| *x = 200);
-    /// assert_eq!(array.get(10, 10), None);
+    /// vecgrid.get_mut_column_major(10).map(|x| *x = 200);
+    /// assert_eq!(vecgrid.get(10, 10), None);
     /// # Ok(())
     /// # }
     /// ```
@@ -723,21 +724,21 @@ impl<T> Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
-    /// let mut array = Array2D::filled_with(42, 2, 3);
+    /// # use vecgrid::{Vecgrid, Error};
+    /// let mut vecgrid = Vecgrid::filled_with(42, 2, 3);
     ///
-    /// let result = array.set(0, 0, 100);
+    /// let result = vecgrid.set(0, 0, 100);
     /// assert_eq!(result, Ok(()));
-    /// assert_eq!(array.get(0, 0), Some(&100));
+    /// assert_eq!(vecgrid.get(0, 0), Some(&100));
     ///
-    /// let result = array.set(10, 20, 200);
+    /// let result = vecgrid.set(10, 20, 200);
     /// assert_eq!(result, Err(Error::IndicesOutOfBounds(10, 20)));
     /// ```
     ///
     /// [`Ok(())`]: https://doc.rust-lang.org/std/result/enum.Result.html#variant.Ok
-    /// [array2d::Error]: enum.Error.html
+    /// [vecgrid::Error]: enum.Error.html
     /// [`Err`]: https://doc.rust-lang.org/std/result/enum.Result.html#variant.Err
-    /// [`array2d::Error`]: enum.Error.html
+    /// [`vecgrid::Error`]: enum.Error.html
     pub fn set(&mut self, row: usize, column: usize, element: T) -> Result<(), Error> {
         self.get_mut(row, column)
             .map(|location| {
@@ -753,21 +754,21 @@ impl<T> Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
-    /// let mut array = Array2D::filled_with(42, 2, 3);
+    /// # use vecgrid::{Vecgrid, Error};
+    /// let mut vecgrid = Vecgrid::filled_with(42, 2, 3);
     ///
-    /// let result = array.set_row_major(4, 100);
+    /// let result = vecgrid.set_row_major(4, 100);
     /// assert_eq!(result, Ok(()));
-    /// assert_eq!(array.get(1, 1), Some(&100));
+    /// assert_eq!(vecgrid.get(1, 1), Some(&100));
     ///
-    /// let result = array.set_row_major(10, 200);
+    /// let result = vecgrid.set_row_major(10, 200);
     /// assert_eq!(result, Err(Error::IndexOutOfBounds(10)));
     /// ```
     ///
     /// [`Ok(())`]: https://doc.rust-lang.org/std/result/enum.Result.html#variant.Ok
-    /// [array2d::Error]: enum.Error.html
+    /// [vecgrid::Error]: enum.Error.html
     /// [`Err`]: https://doc.rust-lang.org/std/result/enum.Result.html#variant.Err
-    /// [`array2d::Error`]: enum.Error.html
+    /// [`vecgrid::Error`]: enum.Error.html
     pub fn set_row_major(&mut self, index: usize, element: T) -> Result<(), Error> {
         self.get_mut_row_major(index)
             .map(|location| {
@@ -783,21 +784,21 @@ impl<T> Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
-    /// let mut array = Array2D::filled_with(42, 2, 3);
+    /// # use vecgrid::{Vecgrid, Error};
+    /// let mut vecgrid = Vecgrid::filled_with(42, 2, 3);
     ///
-    /// let result = array.set_column_major(4, 100);
+    /// let result = vecgrid.set_column_major(4, 100);
     /// assert_eq!(result, Ok(()));
-    /// assert_eq!(array.get(0, 2), Some(&100));
+    /// assert_eq!(vecgrid.get(0, 2), Some(&100));
     ///
-    /// let result = array.set_column_major(10, 200);
+    /// let result = vecgrid.set_column_major(10, 200);
     /// assert_eq!(result, Err(Error::IndexOutOfBounds(10)));
     /// ```
     ///
     /// [`Ok(())`]: https://doc.rust-lang.org/std/result/enum.Result.html#variant.Ok
-    /// [array2d::Error]: enum.Error.html
+    /// [vecgrid::Error]: enum.Error.html
     /// [`Err`]: https://doc.rust-lang.org/std/result/enum.Result.html#variant.Err
-    /// [`array2d::Error`]: enum.Error.html
+    /// [`vecgrid::Error`]: enum.Error.html
     pub fn set_column_major(&mut self, index: usize, element: T) -> Result<(), Error> {
         self.get_mut_column_major(index)
             .map(|location| {
@@ -812,12 +813,12 @@ impl<T> Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
     /// let elements = vec![1, 2, 3, 4, 5, 6];
-    /// let array = Array2D::from_rows(&rows)?;
-    /// let row_major = array.elements_row_major_iter();
+    /// let vecgrid = Vecgrid::from_rows(&rows)?;
+    /// let row_major = vecgrid.elements_row_major_iter();
     /// assert_eq!(row_major.cloned().collect::<Vec<_>>(), elements);
     /// # Ok(())
     /// # }
@@ -826,7 +827,7 @@ impl<T> Array2D<T> {
     /// [`Iterator`]: https://doc.rust-lang.org/std/iter/trait.Iterator.html
     /// [row major order]: https://en.wikipedia.org/wiki/Row-_and_column-major_order
     pub fn elements_row_major_iter(&self) -> impl DoubleEndedIterator<Item = &T> + Clone {
-        self.array.iter()
+        self.vecgrid.iter()
     }
 
     /// Returns an [`Iterator`] over mutable references to all elements in [row major
@@ -835,12 +836,12 @@ impl<T> Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     ///    let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
     ///    let elements = vec![1, 2, 3, 4, 5, 6];
-    ///    let mut array = Array2D::from_rows(&rows)?;
-    ///    let row_major = array.elements_row_major_iter_mut();
+    ///    let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    ///    let row_major = vecgrid.elements_row_major_iter_mut();
     ///    for (i, val) in row_major
     ///        .map(|val| {
     ///            *val += 1;
@@ -857,7 +858,7 @@ impl<T> Array2D<T> {
     /// [`Iterator`]: https://doc.rust-lang.org/std/iter/trait.Iterator.html
     /// [row major order]: https://en.wikipedia.org/wiki/Row-_and_column-major_order
     pub fn elements_row_major_iter_mut(&mut self) -> impl DoubleEndedIterator<Item = &mut T> {
-        self.array.iter_mut()
+        self.vecgrid.iter_mut()
     }
 
     /// Returns an [`Iterator`] over references to all elements in [column major
@@ -866,12 +867,12 @@ impl<T> Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
     /// let elements = vec![1, 4, 2, 5, 3, 6];
-    /// let array = Array2D::from_rows(&rows)?;
-    /// let column_major = array.elements_column_major_iter();
+    /// let vecgrid = Vecgrid::from_rows(&rows)?;
+    /// let column_major = vecgrid.elements_column_major_iter();
     /// assert_eq!(column_major.cloned().collect::<Vec<_>>(), elements);
     /// # Ok(())
     /// # }
@@ -889,12 +890,12 @@ impl<T> Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let rows = vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 9]];
     /// let elements = vec![1, 4, 7, 2, 5, 8, 3, 6, 9];
-    /// let mut array = Array2D::from_rows(&rows)?;
-    /// let column_major = array.elements_column_major_iter_mut();
+    /// let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    /// let column_major = vecgrid.elements_column_major_iter_mut();
     /// for (i, val) in column_major
     ///     .map(|val| {
     ///         *val += 1;
@@ -920,11 +921,11 @@ impl<T> Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    /// let array = Array2D::from_rows(&rows)?;
-    /// let mut row_iter = array.row_iter(1)?;
+    /// let vecgrid = Vecgrid::from_rows(&rows)?;
+    /// let mut row_iter = vecgrid.row_iter(1)?;
     /// assert_eq!(row_iter.next(), Some(&4));
     /// assert_eq!(row_iter.next(), Some(&5));
     /// assert_eq!(row_iter.next(), Some(&6));
@@ -939,7 +940,7 @@ impl<T> Array2D<T> {
             .get_index(row_index, 0)
             .ok_or(Error::IndicesOutOfBounds(row_index, 0))?;
         let end = start + self.row_len();
-        Ok(self.array[start..end].iter())
+        Ok(self.vecgrid[start..end].iter())
     }
 
     /// Returns an [`Iterator`] over mutable references to all elements in the given
@@ -948,11 +949,11 @@ impl<T> Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    /// let mut array = Array2D::from_rows(&rows)?;
-    /// let mut row_iter = array.row_iter_mut(1)?;
+    /// let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    /// let mut row_iter = vecgrid.row_iter_mut(1)?;
     /// assert_eq!(row_iter.next(), Some(&mut 4));
     /// assert_eq!(row_iter.next(), Some(&mut 5));
     /// assert_eq!(row_iter.next(), Some(&mut 6));
@@ -970,7 +971,7 @@ impl<T> Array2D<T> {
             .get_index(row_index, 0)
             .ok_or(Error::IndicesOutOfBounds(row_index, 0))?;
         let end = start + self.row_len();
-        Ok(self.array[start..end].iter_mut())
+        Ok(self.vecgrid[start..end].iter_mut())
     }
 
     /// Returns an [`Iterator`] over references to all elements in the given
@@ -979,11 +980,11 @@ impl<T> Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    /// let array = Array2D::from_rows(&rows)?;
-    /// let mut column_iter = array.column_iter(1)?;
+    /// let vecgrid = Vecgrid::from_rows(&rows)?;
+    /// let mut column_iter = vecgrid.column_iter(1)?;
     /// assert_eq!(column_iter.next(), Some(&2));
     /// assert_eq!(column_iter.next(), Some(&5));
     /// assert_eq!(column_iter.next(), None);
@@ -1008,11 +1009,11 @@ impl<T> Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    /// let mut array = Array2D::from_rows(&rows)?;
-    /// let mut column_iter = array.column_iter_mut(1)?;
+    /// let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    /// let mut column_iter = vecgrid.column_iter_mut(1)?;
     /// assert_eq!(column_iter.next(), Some(&mut 2));
     /// assert_eq!(column_iter.next(), Some(&mut 5));
     /// assert_eq!(column_iter.next(), None);
@@ -1029,7 +1030,7 @@ impl<T> Array2D<T> {
             return Err(Error::IndicesOutOfBounds(0, column_index));
         }
         Ok(self
-            .array
+            .vecgrid
             .iter_mut()
             .skip(column_index)
             .step_by(self.num_columns))
@@ -1041,18 +1042,18 @@ impl<T> Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    /// let array = Array2D::from_rows(&rows)?;
-    /// for row_iter in array.rows_iter() {
+    /// let vecgrid = Vecgrid::from_rows(&rows)?;
+    /// for row_iter in vecgrid.rows_iter() {
     ///     for element in row_iter {
     ///         print!("{} ", element);
     ///     }
     ///     println!();
     /// }
     ///
-    /// let mut rows_iter = array.rows_iter();
+    /// let mut rows_iter = vecgrid.rows_iter();
     ///
     /// let mut first_row_iter = rows_iter.next().unwrap();
     /// assert_eq!(first_row_iter.next(), Some(&1));
@@ -1088,18 +1089,18 @@ impl<T> Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    /// let mut array = Array2D::from_rows(&rows)?;
-    /// for row_iter in array.rows_iter() {
+    /// let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    /// for row_iter in vecgrid.rows_iter() {
     ///     for element in row_iter {
     ///         print!("{} ", element);
     ///     }
     ///     println!();
     /// }
     ///
-    /// let mut rows_iter = array.rows_iter_mut();
+    /// let mut rows_iter = vecgrid.rows_iter_mut();
     ///
     /// let mut first_row_iter = rows_iter.next().unwrap();
     /// assert_eq!(first_row_iter.next(), Some(&mut 1));
@@ -1124,7 +1125,7 @@ impl<T> Array2D<T> {
         &mut self,
     ) -> impl DoubleEndedIterator<Item = impl DoubleEndedIterator<Item = &mut T>> {
         let row_len = self.row_len();
-        self.array.chunks_mut(row_len).map(|r| r.iter_mut())
+        self.vecgrid.chunks_mut(row_len).map(|r| r.iter_mut())
     }
 
     /// Returns an [`Iterator`] over all columns. Each [`Item`] is itself
@@ -1133,18 +1134,18 @@ impl<T> Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    /// let array = Array2D::from_rows(&rows)?;
-    /// for column_iter in array.columns_iter() {
+    /// let vecgrid = Vecgrid::from_rows(&rows)?;
+    /// for column_iter in vecgrid.columns_iter() {
     ///     for element in column_iter {
     ///         print!("{} ", element);
     ///     }
     ///     println!();
     /// }
     ///
-    /// let mut columns_iter = array.columns_iter();
+    /// let mut columns_iter = vecgrid.columns_iter();
     ///
     /// let mut first_column_iter = columns_iter.next().unwrap();
     /// assert_eq!(first_column_iter.next(), Some(&1));
@@ -1183,18 +1184,18 @@ impl<T> Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    /// let mut array = Array2D::from_rows(&rows)?;
-    /// for column_iter in array.columns_iter_mut() {
+    /// let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    /// for column_iter in vecgrid.columns_iter_mut() {
     ///     for element in column_iter {
     ///         print!("{} ", element);
     ///     }
     ///     println!();
     /// }
     ///
-    /// let mut columns_iter = array.columns_iter_mut();
+    /// let mut columns_iter = vecgrid.columns_iter_mut();
     ///
     /// let mut first_column_iter = columns_iter.next().unwrap();
     /// assert_eq!(first_column_iter.next(), Some(&mut 1));
@@ -1222,7 +1223,7 @@ impl<T> Array2D<T> {
         &mut self,
     ) -> impl DoubleEndedIterator<Item = impl DoubleEndedIterator<Item = &mut T>> {
         let (num_columns, num_rows) = (self.num_columns(), self.num_rows());
-        let pointer = self.array.as_mut_ptr();
+        let pointer = self.vecgrid.as_mut_ptr();
         (0..num_columns).map(move |ci| {
             (0..num_rows).map(move |i| {
                 let offset = (i * num_columns) + ci;
@@ -1231,22 +1232,22 @@ impl<T> Array2D<T> {
         })
     }
 
-    /// Collects the [`Array2D`] into a [`Vec`] of rows, each of which contains
+    /// Collects the [`Vecgrid`] into a [`Vec`] of rows, each of which contains
     /// a [`Vec`] of elements.
     ///
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    /// let array = Array2D::from_rows(&rows)?;
-    /// assert_eq!(array.as_rows(), rows);
+    /// let vecgrid = Vecgrid::from_rows(&rows)?;
+    /// assert_eq!(vecgrid.as_rows(), rows);
     /// # Ok(())
     /// # }
     /// ```
     ///
-    /// [`Array2D`]: struct.Array2D.html
+    /// [`Vecgrid`]: struct.Vecgrid.html
     /// [`Vec`]: https://doc.rust-lang.org/std/vec/struct.Vec.html
     pub fn as_rows(&self) -> Vec<Vec<T>>
     where
@@ -1257,22 +1258,22 @@ impl<T> Array2D<T> {
             .collect()
     }
 
-    /// Collects the [`Array2D`] into a [`Vec`] of columns, each of which
+    /// Collects the [`Vecgrid`] into a [`Vec`] of columns, each of which
     /// contains a [`Vec`] of elements.
     ///
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let columns = vec![vec![1, 4], vec![2, 5], vec![3, 6]];
-    /// let array = Array2D::from_columns(&columns)?;
-    /// assert_eq!(array.as_columns(), columns);
+    /// let vecgrid = Vecgrid::from_columns(&columns)?;
+    /// assert_eq!(vecgrid.as_columns(), columns);
     /// # Ok(())
     /// # }
     /// ```
     ///
-    /// [`Array2D`]: struct.Array2D.html
+    /// [`Vecgrid`]: struct.Vecgrid.html
     /// [`Vec`]: https://doc.rust-lang.org/std/vec/struct.Vec.html
     pub fn as_columns(&self) -> Vec<Vec<T>>
     where
@@ -1283,22 +1284,22 @@ impl<T> Array2D<T> {
             .collect()
     }
 
-    /// Collects the [`Array2D`] into a [`Vec`] of elements in [row major
+    /// Collects the [`Vecgrid`] into a [`Vec`] of elements in [row major
     /// order].
     ///
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    /// let array = Array2D::from_rows(&rows)?;
-    /// assert_eq!(array.as_row_major(), vec![1, 2, 3, 4, 5, 6]);
+    /// let vecgrid = Vecgrid::from_rows(&rows)?;
+    /// assert_eq!(vecgrid.as_row_major(), vec![1, 2, 3, 4, 5, 6]);
     /// # Ok(())
     /// # }
     /// ```
     ///
-    /// [`Array2D`]: struct.Array2D.html
+    /// [`Vecgrid`]: struct.Vecgrid.html
     /// [`Vec`]: https://doc.rust-lang.org/std/vec/struct.Vec.html
     /// [row major order]: https://en.wikipedia.org/wiki/Row-_and_column-major_order
     pub fn as_row_major(&self) -> Vec<T>
@@ -1308,22 +1309,22 @@ impl<T> Array2D<T> {
         self.elements_row_major_iter().cloned().collect()
     }
 
-    /// Collects the [`Array2D`] into a [`Vec`] of elements in [column major
+    /// Collects the [`Vecgrid`] into a [`Vec`] of elements in [column major
     /// order].
     ///
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    /// let array = Array2D::from_rows(&rows)?;
-    /// assert_eq!(array.as_column_major(), vec![1, 4, 2, 5, 3, 6]);
+    /// let vecgrid = Vecgrid::from_rows(&rows)?;
+    /// assert_eq!(vecgrid.as_column_major(), vec![1, 4, 2, 5, 3, 6]);
     /// # Ok(())
     /// # }
     /// ```
     ///
-    /// [`Array2D`]: struct.Array2D.html
+    /// [`Vecgrid`]: struct.Vecgrid.html
     /// [`Vec`]: https://doc.rust-lang.org/std/vec/struct.Vec.html
     /// [column major order]: https://en.wikipedia.org/wiki/Row-_and_column-major_order
     pub fn as_column_major(&self) -> Vec<T>
@@ -1333,16 +1334,16 @@ impl<T> Array2D<T> {
         self.elements_column_major_iter().cloned().collect()
     }
 
-    /// Returns the indices of the array in row major order. Each index is a tuple of [`usize`].
+    /// Returns the indices of the vecgrid in row major order. Each index is a tuple of [`usize`].
     ///
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    /// let array = Array2D::from_rows(&rows)?;
-    /// let indices_row_major = array.indices_row_major().collect::<Vec<_>>();
+    /// let vecgrid = Vecgrid::from_rows(&rows)?;
+    /// let indices_row_major = vecgrid.indices_row_major().collect::<Vec<_>>();
     /// assert_eq!(
     ///     indices_row_major,
     ///     vec![(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2)]
@@ -1356,16 +1357,16 @@ impl<T> Array2D<T> {
         indices_row_major(self.num_rows, self.num_columns)
     }
 
-    /// Returns the indices of the array in column major order. Each index is a tuple of [`usize`].
+    /// Returns the indices of the vecgrid in column major order. Each index is a tuple of [`usize`].
     ///
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    /// let array = Array2D::from_rows(&rows)?;
-    /// let indices_column_major = array.indices_column_major().collect::<Vec<_>>();
+    /// let vecgrid = Vecgrid::from_rows(&rows)?;
+    /// let indices_column_major = vecgrid.indices_column_major().collect::<Vec<_>>();
     /// assert_eq!(
     ///     indices_column_major,
     ///     vec![(0, 0), (1, 0), (0, 1), (1, 1), (0, 2), (1, 2)]
@@ -1379,15 +1380,15 @@ impl<T> Array2D<T> {
         indices_column_major(self.num_rows, self.num_columns)
     }
 
-    /// Iterate through the array in row major order along with the corresponding indices. Each
+    /// Iterate through the vecgrid in row major order along with the corresponding indices. Each
     /// index is a tuple of [`usize`].
     ///
     /// # Examples
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    /// let array = Array2D::from_rows(&rows)?;
-    /// let enumerate_row_major = array.enumerate_row_major().collect::<Vec<_>>();
+    /// let vecgrid = Vecgrid::from_rows(&rows)?;
+    /// let enumerate_row_major = vecgrid.enumerate_row_major().collect::<Vec<_>>();
     /// assert_eq!(
     ///     enumerate_row_major,
     ///     vec![
@@ -1403,19 +1404,21 @@ impl<T> Array2D<T> {
     /// # }
     ///
     /// [`usize`]: https://doc.rust-lang.org/std/primitive.usize.html
-    pub fn enumerate_row_major(&self) -> impl DoubleEndedIterator<Item = ((usize, usize), &T)> + Clone {
+    pub fn enumerate_row_major(
+        &self,
+    ) -> impl DoubleEndedIterator<Item = ((usize, usize), &T)> + Clone {
         self.indices_row_major().map(move |i| (i, &self[i]))
     }
 
-    /// Iterate through the array in column major order along with the corresponding indices. Each
+    /// Iterate through the vecgrid in column major order along with the corresponding indices. Each
     /// index is a tuple of [`usize`].
     ///
     /// # Examples
-    /// # use array2d::{Array2D, Error};
+    /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    /// let array = Array2D::from_rows(&rows)?;
-    /// let enumerate_column_major = array.enumerate_column_major().collect::<Vec<_>>();
+    /// let vecgrid = Vecgrid::from_rows(&rows)?;
+    /// let enumerate_column_major = vecgrid.enumerate_column_major().collect::<Vec<_>>();
     /// assert_eq!(
     ///     enumerate_column_major,
     ///     vec![
@@ -1431,7 +1434,9 @@ impl<T> Array2D<T> {
     /// # }
     ///
     /// [`usize`]: https://doc.rust-lang.org/std/primitive.usize.html
-    pub fn enumerate_column_major(&self) -> impl DoubleEndedIterator<Item = ((usize, usize), &T)> + Clone {
+    pub fn enumerate_column_major(
+        &self,
+    ) -> impl DoubleEndedIterator<Item = ((usize, usize), &T)> + Clone {
         self.indices_column_major().map(move |i| (i, &self[i]))
     }
 
@@ -1444,7 +1449,7 @@ impl<T> Array2D<T> {
     }
 }
 
-impl<T> Index<(usize, usize)> for Array2D<T> {
+impl<T> Index<(usize, usize)> for Vecgrid<T> {
     type Output = T;
 
     /// Returns the element at the given indices, given as `(row, column)`.
@@ -1452,9 +1457,9 @@ impl<T> Index<(usize, usize)> for Array2D<T> {
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
-    /// let array = Array2D::filled_with(42, 2, 3);
-    /// assert_eq!(array[(0, 0)], 42);
+    /// # use vecgrid::{Vecgrid, Error};
+    /// let vecgrid = Vecgrid::filled_with(42, 2, 3);
+    /// assert_eq!(vecgrid[(0, 0)], 42);
     /// ```
     ///
     /// # Panics
@@ -1462,9 +1467,9 @@ impl<T> Index<(usize, usize)> for Array2D<T> {
     /// Panics if the indices are out of bounds.
     ///
     /// ```rust,should_panic
-    /// # use array2d::Array2D;
-    /// let array = Array2D::filled_with(42, 2, 3);
-    /// let element = array[(10, 10)];
+    /// # use vecgrid::Vecgrid;
+    /// let vecgrid = Vecgrid::filled_with(42, 2, 3);
+    /// let element = vecgrid[(10, 10)];
     /// ```
     fn index(&self, (row, column): (usize, usize)) -> &Self::Output {
         self.get(row, column)
@@ -1472,17 +1477,17 @@ impl<T> Index<(usize, usize)> for Array2D<T> {
     }
 }
 
-impl<T> IndexMut<(usize, usize)> for Array2D<T> {
+impl<T> IndexMut<(usize, usize)> for Vecgrid<T> {
     /// Returns a mutable version of the element at the given indices, given as
     /// `(row, column)`.
     ///
     /// # Examples
     ///
     /// ```
-    /// # use array2d::{Array2D, Error};
-    /// let mut array = Array2D::filled_with(42, 2, 3);
-    /// array[(0, 0)] = 100;
-    /// assert_eq!(array[(0, 0)], 100);
+    /// # use vecgrid::{Vecgrid, Error};
+    /// let mut vecgrid = Vecgrid::filled_with(42, 2, 3);
+    /// vecgrid[(0, 0)] = 100;
+    /// assert_eq!(vecgrid[(0, 0)], 100);
     /// ```
     ///
     /// # Panics
@@ -1490,9 +1495,9 @@ impl<T> IndexMut<(usize, usize)> for Array2D<T> {
     /// Panics if the indices are out of bounds.
     ///
     /// ```rust,should_panic
-    /// # use array2d::Array2D;
-    /// let mut array = Array2D::filled_with(42, 2, 3);
-    /// array[(10, 10)] = 7;
+    /// # use vecgrid::Vecgrid;
+    /// let mut vecgrid = Vecgrid::filled_with(42, 2, 3);
+    /// vecgrid[(10, 10)] = 7;
     /// ```
     fn index_mut(&mut self, (row, column): (usize, usize)) -> &mut Self::Output {
         self.get_mut(row, column)

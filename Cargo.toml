@@ -1,12 +1,26 @@
 [package]
-name = "array2d"
-version = "0.2.1"
-authors = ["Harrison McCullough <mccullough.harrison@gmail.com>"]
-edition = "2018"
-description = "A fixed sized two-dimensional array"
+name = "vecgrid"
+version = "0.1.0"
+authors = [
+    "Praxis | Darian <hello@vulpinecat.com>",
+    "Harrison McCullough <mccullough.harrison@gmail.com>",
+]
+edition = "2021"
+description = "A dynamically sized two-dimensional vector"
 readme = "README.md"
 license = "MIT"
-repository = "https://github.com/HarrisonMc555/array2d"
+repository = "https://github.com/good-praxis/vecgrid"
+
+
+[[example]]
+name = "random"
+path = "examples/random.rs"
+[[example]]
+name = "tic-tac-toe"
+path = "examples/tic-tac-toe.rs"
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"], optional = true }
+
+[dev-dependencies]
+rand = "0.8.5"
