@@ -790,8 +790,10 @@ fn test_insert_row() -> Result<(), Error> {
     let new_row = vec![4, 5, 6];
     let result = vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 9]];
     let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    assert_eq!(vecgrid.num_rows(), 2);
     vecgrid.insert_row(new_row.clone(), 1)?;
     assert_eq!(vecgrid.as_rows(), result);
+    assert_eq!(vecgrid.num_rows(), 3);
 
     let invalid_row = vec![10, 11];
     assert!(vecgrid.insert_row(invalid_row, 1).is_err());
