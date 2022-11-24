@@ -20,7 +20,7 @@ This project attemps to extend the upstream project in an opinionated fashion, b
 - [x] `columns_iter_mut`
 - [x] `elements_row_major_iter_mut`
 - [x] `elements_column_major_iter_mut`
-- [ ] `insert_row`
+- [x] `insert_row`
 - [ ] `insert_column`
 - [ ] `insert_rows`
 - [ ] `insert_columns`
@@ -52,6 +52,12 @@ A [`Vecgrid`] can be created in many different ways. These include:
   [`filled_by_column_major`]).
 - Providing an iterator that is used to produce values to fill the vecgrid
   (see [`from_iter_row_major`] and [`from_iter_column_major`]).
+
+### Extending a [`Vecgrid`]
+
+Since [`Vecgrid`]s are dynamically sized, it is possible to extend them:
+
+- Providing singular rows of matching length alongside row indices to [`insert_row`].
 
 ### Accessing data from a [`Vecgrid`]
 
@@ -160,35 +166,36 @@ pub fn main() -> Result<(), Error> {
 
 This library is made possible thanks to the excellent groundwork laid down in [`Array2D`] by author [HarrisonMc555](https://github.com/HarrisonMc555), as well as contributor to the upstream project [tylerjw](https://github.com/tylerjw). [`Array2D`] has been published under the MIT license.
 
-[`vecgrid`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html
-[`from_rows`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.from_rows
-[`from_columns`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.from_columns
-[`from_row_major`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.from_row_major
-[`from_column_major`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.from_column_major
-[`filled_with`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.filled_with
-[`filled_by_row_major`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.filled_by_row_major
-[`filled_by_column_major`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.filled_by_column_major
-[`from_iter_row_major`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.from_iter_row_major
-[`from_iter_column_major`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.from_iter_column_major
-[`get`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.get
-[`get_mut`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.get_mut
-[`set`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.set
-[`elements_row_major_iter`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.elements_row_major_iter
-[`elements_column_major_iter`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.elements_column_major_iter
-[`elements_row_major_iter_mut`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.elements_row_major_iter_mut
-[`elements_column_major_iter_mut`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.elements_column_major_iter_mut
-[`row_iter`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.row_iter
-[`column_iter`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.column_iter
-[`row_iter_mut`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.row_iter_mut
-[`column_iter_mut`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.column_iter_mut
-[`rows_iter`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.rows_iter
-[`columns_iter`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.columns_iter
-[`rows_iter_mut`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.rows_iter_mut
-[`columns_iter_mut`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.columns_iter_mut
-[`as_rows`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.as_rows
-[`as_columns`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.as_columns
-[`as_row_major`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.as_row_major
-[`as_column_major`]: https://docs.rs/vecgrid/0.1.1/vecgrid/struct.Vecgrid.html#method.as_column_major
+[`vecgrid`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html
+[`from_rows`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.from_rows
+[`from_columns`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.from_columns
+[`from_row_major`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.from_row_major
+[`from_column_major`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.from_column_major
+[`filled_with`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.filled_with
+[`filled_by_row_major`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.filled_by_row_major
+[`filled_by_column_major`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.filled_by_column_major
+[`from_iter_row_major`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.from_iter_row_major
+[`from_iter_column_major`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.from_iter_column_major
+[`get`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.get
+[`get_mut`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.get_mut
+[`set`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.set
+[`elements_row_major_iter`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.elements_row_major_iter
+[`elements_column_major_iter`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.elements_column_major_iter
+[`elements_row_major_iter_mut`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.elements_row_major_iter_mut
+[`elements_column_major_iter_mut`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.elements_column_major_iter_mut
+[`row_iter`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.row_iter
+[`column_iter`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.column_iter
+[`row_iter_mut`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.row_iter_mut
+[`column_iter_mut`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.column_iter_mut
+[`rows_iter`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.rows_iter
+[`columns_iter`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.columns_iter
+[`rows_iter_mut`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.rows_iter_mut
+[`columns_iter_mut`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.columns_iter_mut
+[`as_rows`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.as_rows
+[`as_columns`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.as_columns
+[`as_row_major`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.as_row_major
+[`as_column_major`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.as_column_major
+[`insert_row`]: https://docs.rs/vecgrid/0.1.2/vecgrid/struct.Vecgrid.html#method.insert_row
 [`vec`]: https://doc.rust-lang.org/std/vec/struct.Vec.html
 [`option`]: https://doc.rust-lang.org/std/option/
 [`result`]: https://doc.rust-lang.org/std/result/

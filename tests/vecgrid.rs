@@ -784,6 +784,21 @@ fn test_enumerate_row_major() -> Result<(), Error> {
     Ok(())
 }
 
+#[test]
+fn test_insert_row() -> Result<(), Error> {
+    let rows = vec![vec![1, 2, 3], vec![7, 8, 9]];
+    let new_row = vec![4, 5, 6];
+    let result = vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 9]];
+    let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    vecgrid.insert_row(new_row.clone(), 1)?;
+    assert_eq!(vecgrid.as_rows(), result);
+
+    let invalid_row = vec![10, 11];
+    assert!(vecgrid.insert_row(invalid_row, 1).is_err());
+    assert!(vecgrid.insert_row(new_row, 10).is_err());
+    Ok(())
+}
+
 fn main() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
     let vecgrid = Vecgrid::from_rows(&rows)?;

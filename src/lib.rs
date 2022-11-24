@@ -25,6 +25,12 @@
 //!   - Providing an iterator that is used to produce values to fill the vecgrid
 //!     (see [`from_iter_row_major`] and [`from_iter_column_major`]).
 //!
+//! ## Extending a [`Vecgrid`]
+//!
+//! Since [`Vecgrid`]s are dynamically sized, it is possible to extend them:
+//!
+//!   - Providing singular rows of matching length alongside row indices to [`insert_row`].
+//!
 //! ## Accessing data from an [`Vecgrid`]
 //!
 //! [`Vecgrid`] supports several forms of indexing:
@@ -160,6 +166,7 @@
 //! [`as_columns`]: struct.Vecgrid.html#method.as_columns
 //! [`as_row_major`]: struct.Vecgrid.html#method.as_row_major
 //! [`as_column_major`]: struct.Vecgrid.html#method.as_column_major
+//! [`insert_row`]: struct.Vecgrid.html#method.insert_row
 //! [`Vec`]: https://doc.rust-lang.org/std/vec/struct.Vec.html
 //! [`Option`]: https://doc.rust-lang.org/std/option/
 //! [`Result`]: https://doc.rust-lang.org/std/result/
@@ -1436,6 +1443,35 @@ impl<T> Vecgrid<T> {
             Some(row * self.row_len() + column)
         } else {
             None
+        }
+    }
+
+    /// Inserts a new row into the vecgrid at the provided index of the row.
+    /// Guards ensure that the supplied row matches the expected dimensions and that
+    /// the index is in bound.
+    ///
+    /// # Examples
+    /// # use vecgrid::{Vecgrid, Error};
+    /// # fn main() -> Result<(), Error> {
+    /// let rows = vec![vec![1, 2, 3], vec![7, 8, 9]];
+    /// let new_row = vec![4, 5, 6];
+    /// let result = vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 9]];
+    /// let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    /// vecgrid.insert_row(new_row.clone(), 1)?;
+    /// assert_eq!(vecgrid.as_rows(), result);
+    /// # Ok(())
+    /// # }
+    ///
+    pub fn insert_row(&mut self, row: Vec<T>, at: usize) -> Result<(), Error> {
+        match (row.len() == self.num_columns, at < self.num_rows) {
+            (false, _) => Err(Error::DimensionMismatch),
+            (_, false) => Err(Error::IndexOutOfBounds(at)),
+            (true, true) => {
+                let i = at * self.row_len();
+                self.vecgrid.splice(i..i, row.into_iter());
+                self.num_rows += 1;
+                Ok(())
+            }
         }
     }
 }
