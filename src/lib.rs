@@ -388,15 +388,6 @@ impl<T> Vecgrid<T> {
         }
     }
 
-    #[deprecated(since = "0.2.0", note = "Renamed to filled_with")]
-    /// Renamed to filled_with.
-    pub fn fill_with(element: T, num_rows: usize, num_columns: usize) -> Self
-    where
-        T: Clone,
-    {
-        Vecgrid::filled_with(element, num_rows, num_columns)
-    }
-
     /// Creates a new [`Vecgrid`] with the specified number of rows and columns
     /// and fills each element with the result of calling the given
     /// function. The function is called once for every location going in
