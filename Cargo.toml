@@ -1,6 +1,6 @@
 [package]
 name = "vecgrid"
-version = "0.1.0"
+version = "0.1.1"
 authors = [
     "Praxis | Darian <hello@vulpinecat.com>",
     "Harrison McCullough <mccullough.harrison@gmail.com>",
