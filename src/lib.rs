@@ -144,7 +144,7 @@
 //! [`from_iter_row_major`]: struct.Vecgrid.html#method.from_iter_row_major
 //! [`from_iter_column_major`]: struct.Vecgrid.html#method.from_iter_column_major
 //! [`get`]: struct.Vecgrid.html#method.get
-//! [`get_mut`]: struct.Vecgrid.html#method.get_muthttps://docs.rs/vecgrid/latest/vecgrid/
+//! [`get_mut`]: struct.Vecgrid.html#method.get_mut
 //! [`set`]: struct.Vecgrid.html#method.set
 //! [`get_row_major`]: struct.Vecgrid.html#method.get_row_major
 //! [`get_mut_row_major`]: struct.Vecgrid.html#method.get_mut_row_major
