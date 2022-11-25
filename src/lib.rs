@@ -29,7 +29,8 @@
 //!
 //! Since [`Vecgrid`]s are dynamically sized, it is possible to extend them:
 //!
-//!   - Providing singular rows of matching length alongside row indices to [`insert_row`].
+//!   - Providing singular rows of matching length alongside row indices to [`insert_row`],
+//!     or providing a mutable slice of rows to [`insert_rows`].
 //!
 //! ## Accessing data from an [`Vecgrid`]
 //!
@@ -142,7 +143,7 @@
 //! [`from_iter_row_major`]: struct.Vecgrid.html#method.from_iter_row_major
 //! [`from_iter_column_major`]: struct.Vecgrid.html#method.from_iter_column_major
 //! [`get`]: struct.Vecgrid.html#method.get
-//! [`get_mut`]: struct.Vecgrid.html#method.get_mut
+//! [`get_mut`]: struct.Vecgrid.html#method.get_muthttps://docs.rs/vecgrid/latest/vecgrid/
 //! [`set`]: struct.Vecgrid.html#method.set
 //! [`get_row_major`]: struct.Vecgrid.html#method.get_row_major
 //! [`get_mut_row_major`]: struct.Vecgrid.html#method.get_mut_row_major
@@ -167,6 +168,7 @@
 //! [`as_row_major`]: struct.Vecgrid.html#method.as_row_major
 //! [`as_column_major`]: struct.Vecgrid.html#method.as_column_major
 //! [`insert_row`]: struct.Vecgrid.html#method.insert_row
+//! [`insert_rows`]: struct.Vecgrid.html#method.insert_rows
 //! [`Vec`]: https://doc.rust-lang.org/std/vec/struct.Vec.html
 //! [`Option`]: https://doc.rust-lang.org/std/option/
 //! [`Result`]: https://doc.rust-lang.org/std/result/
@@ -1457,7 +1459,7 @@ impl<T> Vecgrid<T> {
     /// let new_row = vec![4, 5, 6];
     /// let result = vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 9]];
     /// let mut vecgrid = Vecgrid::from_rows(&rows)?;
-    /// vecgrid.insert_row(new_row.clone(), 1)?;
+    /// vecgrid.insert_row(new_row, 1)?;
     /// assert_eq!(vecgrid.as_rows(), result);
     /// # Ok(())
     /// # }
@@ -1468,8 +1470,49 @@ impl<T> Vecgrid<T> {
             (_, false) => Err(Error::IndexOutOfBounds(at)),
             (true, true) => {
                 let i = at * self.row_len();
-                self.vecgrid.splice(i..i, row.into_iter());
+                self.vecgrid.splice(i..i, row);
                 self.num_rows += 1;
+                Ok(())
+            }
+        }
+    }
+
+    /// Inserts a slice of rows into the vecgrid at the provided index.
+    /// Guards ensure that the supplied rows matches the expected dimensions and that
+    /// the index is in bound.
+    ///
+    /// # Examples
+    /// # use vecgrid::{Vecgrid, Error};
+    /// # fn main() -> Result<(), Error> {
+    /// let rows = vec![vec![1, 2], vec![7, 8]];
+    /// let new_rows = vec![vec![3, 4], vec![5, 6]];
+    /// let result = vec![vec![1, 2], vec![3, 4], vec![5, 6], vec![7, 8]];
+    /// let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    /// vecgrid.insert_rows(new_row, 1)?;
+    /// assert_eq!(vecgrid.as_rows(), result);
+    /// # Ok(())
+    /// # }
+    ///
+    pub fn insert_rows(&mut self, rows: &mut [Vec<T>], at: usize) -> Result<(), Error> {
+        match (
+            rows.into_iter().all(|r| r.len() == self.num_columns),
+            at < self.num_rows,
+        ) {
+            (false, _) => Err(Error::DimensionMismatch),
+            (_, false) => Err(Error::IndexOutOfBounds(at)),
+            (true, true) => {
+                let i = at * self.row_len();
+                let capacity = self.num_columns * rows.len();
+
+                self.vecgrid.splice(
+                    i..i,
+                    rows.iter_mut()
+                        .fold(Vec::with_capacity(capacity), |mut vec, r| {
+                            vec.append(r);
+                            vec
+                        }),
+                );
+                self.num_rows += rows.len();
                 Ok(())
             }
         }
