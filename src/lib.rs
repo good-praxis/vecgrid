@@ -1497,7 +1497,7 @@ impl<T> Vecgrid<T> {
     ///
     pub fn insert_rows(&mut self, rows: &mut [Vec<T>], at: usize) -> Result<(), Error> {
         match (
-            rows.into_iter().all(|r| r.len() == self.num_columns),
+            rows.iter_mut().all(|r| r.len() == self.num_columns),
             at < self.num_rows,
         ) {
             (false, _) => Err(Error::DimensionMismatch),
@@ -1536,7 +1536,7 @@ impl<T> Vecgrid<T> {
     /// # }
     ///
     pub fn append_rows(&mut self, rows: &mut [Vec<T>]) -> Result<(), Error> {
-        if !rows.into_iter().all(|r| r.len() == self.num_columns) {
+        if !rows.iter_mut().all(|r| r.len() == self.num_columns) {
             return Err(Error::DimensionMismatch);
         }
         self.vecgrid.reserve(rows.len() * self.num_columns);
