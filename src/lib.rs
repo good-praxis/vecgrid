@@ -31,6 +31,7 @@
 //!
 //!   - Providing singular rows of matching length alongside row indices to [`insert_row`],
 //!     or providing a mutable slice of rows to [`insert_rows`].
+//!   - Append the grid, either with matching length rows via [`append_rows`]... or future additions!
 //!
 //! ## Accessing data from an [`Vecgrid`]
 //!
@@ -169,6 +170,7 @@
 //! [`as_column_major`]: struct.Vecgrid.html#method.as_column_major
 //! [`insert_row`]: struct.Vecgrid.html#method.insert_row
 //! [`insert_rows`]: struct.Vecgrid.html#method.insert_rows
+//! [`append_rows`]: struct.Vecgrid.html#method.append_rows
 //! [`Vec`]: https://doc.rust-lang.org/std/vec/struct.Vec.html
 //! [`Option`]: https://doc.rust-lang.org/std/option/
 //! [`Result`]: https://doc.rust-lang.org/std/result/
@@ -1516,6 +1518,33 @@ impl<T> Vecgrid<T> {
                 Ok(())
             }
         }
+    }
+
+    /// Appends a slice of rows at the end of the vecgrid.
+    /// Guards ensure that the supplied rows matches the expected dimensions.
+    ///
+    /// # Examples
+    /// # use vecgrid::{Vecgrid, Error};
+    /// # fn main() -> Result<(), Error> {
+    /// let rows = vec![vec![1, 2], vec![3, 4]];
+    /// let new_rows = vec![vec![5, 6], vec![7, 8]];
+    /// let result = vec![vec![1, 2], vec![3, 4], vec![5, 6], vec![7, 8]];
+    /// let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    /// vecgrid.append_rows(new_row)?;
+    /// assert_eq!(vecgrid.as_rows(), result);
+    /// # Ok(())
+    /// # }
+    ///
+    pub fn append_rows(&mut self, rows: &mut [Vec<T>]) -> Result<(), Error> {
+        if !rows.into_iter().all(|r| r.len() == self.num_columns) {
+            return Err(Error::DimensionMismatch);
+        }
+        self.vecgrid.reserve(rows.len() * self.num_columns);
+        for row in rows {
+            self.vecgrid.append(row);
+            self.num_rows += 1;
+        }
+        Ok(())
     }
 }
 

@@ -26,7 +26,7 @@ This project attemps to extend the upstream project in an opinionated fashion, b
 - [ ] `insert_columns`
 - [ ] `remove_row`
 - [ ] `remove column`
-- [ ] `append_rows`
+- [x] `append_rows`
 - [ ] `append_columns`
 - [ ] `extend_rows`
 - [ ] `extend_columns`
@@ -59,6 +59,7 @@ Since [`Vecgrid`]s are dynamically sized, it is possible to extend them:
 
 - Providing singular rows of matching length alongside row indices to [`insert_row`],
   or providing a mutable slice of rows to [`insert_rows`].
+- Append the grid, either with matching length rows via [`append_rows`]... or future additions!
 
 ### Accessing data from a [`Vecgrid`]
 
@@ -198,6 +199,7 @@ This library is made possible thanks to the excellent groundwork laid down in [`
 [`as_column_major`]: https://docs.rs/vecgrid/latest/vecgrid/struct.Vecgrid.html#method.as_column_major
 [`insert_row`]: https://docs.rs/vecgrid/latest/vecgrid/struct.Vecgrid.html#method.insert_row
 [`insert_rows`]: https://docs.rs/vecgrid/latest/vecgrid/struct.Vecgrid.html#method.insert_rows
+[`append_rows`]: https://docs.rs/vecgrid/latest/vecgrid/struct.Vecgrid.html#method.append_rows
 [`vec`]: https://doc.rust-lang.org/std/vec/struct.Vec.html
 [`option`]: https://doc.rust-lang.org/std/option/
 [`result`]: https://doc.rust-lang.org/std/result/
