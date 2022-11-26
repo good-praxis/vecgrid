@@ -13,9 +13,9 @@
 //! An [`Vecgrid`] can be created in many different ways. These include:
 //!   - Providing the rows or the columns, which must all be the same size (see
 //!     [`from_rows`] and [`from_columns`]).
-//!   - Providing a "flat" slice of elements in either [row major or column
+//!   - Providing a "flat" vector of elements in either [row major or column
 //!     major order] along with the dimensions, which must match the number of
-//!     elements in the slice (see [`from_row_major`] and
+//!     elements in the vector (see [`from_row_major`] and
 //!     [`from_column_major`]).
 //!   - Providing a value to repeatedly put in every location (see
 //!     [`filled_with`]).
@@ -81,7 +81,7 @@
 //!     // Create a vecgrid from the given rows. You can also use columns
 //!     // with the `columns` function
 //!     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-//!     let from_rows = Vecgrid::from_rows(rows.clone())?;
+//!     let from_rows = Vecgrid::from_rows(rows)?;
 //!     assert_eq!(from_rows.num_rows(), 2);
 //!     assert_eq!(from_rows.num_columns(), 3);
 //!     assert_eq!(from_rows[(1, 1)], 5);
@@ -90,7 +90,7 @@
 //!     // column major order.
 //!     let column_major = vec![1, 4, 2, 5, 3, 6];
 //!     let from_column_major =
-//!         Vecgrid::from_column_major(&column_major, 2, 3)?;
+//!         Vecgrid::from_column_major(column_major, 2, 3)?;
 //!     assert_eq!(from_column_major.num_rows(), 2);
 //!     assert_eq!(from_column_major.num_columns(), 3);
 //!     assert_eq!(from_column_major[(1, 1)], 5);
@@ -209,7 +209,7 @@ pub enum Error {
 }
 
 impl<T> Vecgrid<T> {
-    /// Creates a new [`Vecgrid`] from a slice of rows, each of which is a
+    /// Creates a new [`Vecgrid`] from a [`Vec`] of rows, each of which is a
     /// [`Vec`] of elements.
     ///
     /// Returns an error if the rows are not all the same size.
@@ -231,19 +231,16 @@ impl<T> Vecgrid<T> {
     /// [`Vec`]: https://doc.rust-lang.org/std/vec/struct.Vec.html
     pub fn from_rows(rows: Vec<Vec<T>>) -> Result<Self, Error> {
         let row_len = rows.get(0).map(Vec::len).unwrap_or(0);
-        if !rows.iter().all(|row| row.len() == row_len) {
-            return Err(Error::DimensionMismatch);
-        }
-        let num_rows = rows.len();
-        let num_elements = row_len * num_rows;
-        Ok(Vecgrid {
-            vecgrid: with_size_hint(rows.into_iter().flatten(), num_elements).collect(),
-            num_rows,
+        let mut vecgrid = Vecgrid {
+            vecgrid: Vec::new(),
+            num_rows: 0,
             num_columns: row_len,
-        })
+        };
+        vecgrid.append_rows(rows)?;
+        Ok(vecgrid)
     }
 
-    /// Creates a new [`Vecgrid`] from a slice of columns, each of which
+    /// Creates a new [`Vecgrid`] from a [`Vec`] of columns, each of which
     /// contains a [`Vec`] of elements.
     ///
     /// Returns an error if the columns are not all the same size.
@@ -254,7 +251,7 @@ impl<T> Vecgrid<T> {
     /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let columns = vec![vec![1, 4], vec![2, 5], vec![3, 6]];
-    /// let vecgrid = Vecgrid::from_columns(&columns)?;
+    /// let vecgrid = Vecgrid::from_columns(columns.clone())?;
     /// assert_eq!(vecgrid[(1, 2)], 6);
     /// assert_eq!(vecgrid.as_rows(), vec![vec![1, 2, 3], vec![4, 5, 6]]);
     /// # Ok(())
@@ -263,18 +260,18 @@ impl<T> Vecgrid<T> {
     ///
     /// [`Vecgrid`]: struct.Vecgrid.html
     /// [`Vec`]: https://doc.rust-lang.org/std/vec/struct.Vec.html
-    pub fn from_columns(elements: &[Vec<T>]) -> Result<Self, Error>
+    pub fn from_columns(columns: Vec<Vec<T>>) -> Result<Self, Error>
     where
-        T: Clone,
+        T: Clone, //TODO: Remove type guard
     {
-        let column_len = elements.get(0).map(Vec::len).unwrap_or(0);
-        if !elements.iter().all(|column| column.len() == column_len) {
+        let column_len = columns.get(0).map(Vec::len).unwrap_or(0);
+        if !columns.iter().all(|column| column.len() == column_len) {
             return Err(Error::DimensionMismatch);
         }
         let num_rows = column_len;
-        let num_columns = elements.len();
+        let num_columns = columns.len();
         let vecgrid = indices_row_major(num_rows, num_columns)
-            .map(|(row, column)| elements[column][row].clone())
+            .map(|(row, column)| columns[column][row].clone())
             .collect();
         Ok(Vecgrid {
             vecgrid,
@@ -296,7 +293,7 @@ impl<T> Vecgrid<T> {
     /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let row_major = vec![1, 2, 3, 4, 5, 6];
-    /// let vecgrid = Vecgrid::from_row_major(&row_major, 2, 3)?;
+    /// let vecgrid = Vecgrid::from_row_major(row_major, 2, 3)?;
     /// assert_eq!(vecgrid[(1, 2)], 6);
     /// assert_eq!(vecgrid.as_rows(), vec![vec![1, 2, 3], vec![4, 5, 6]]);
     /// # Ok(())
@@ -306,19 +303,16 @@ impl<T> Vecgrid<T> {
     /// [`Vecgrid`]: struct.Vecgrid.html
     /// [row major order]: https://en.wikipedia.org/wiki/Row-_and_column-major_order
     pub fn from_row_major(
-        elements: &[T],
+        elements: Vec<T>,
         num_rows: usize,
         num_columns: usize,
-    ) -> Result<Self, Error>
-    where
-        T: Clone,
-    {
+    ) -> Result<Self, Error> {
         let total_len = num_rows * num_columns;
         if total_len != elements.len() {
             return Err(Error::DimensionMismatch);
         }
         Ok(Vecgrid {
-            vecgrid: elements.to_vec(),
+            vecgrid: elements,
             num_rows,
             num_columns,
         })
@@ -337,7 +331,7 @@ impl<T> Vecgrid<T> {
     /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let column_major = vec![1, 4, 2, 5, 3, 6];
-    /// let vecgrid = Vecgrid::from_column_major(&column_major, 2, 3)?;
+    /// let vecgrid = Vecgrid::from_column_major(column_major, 2, 3)?;
     /// assert_eq!(vecgrid[(1, 2)], 6);
     /// assert_eq!(vecgrid.as_rows(), vec![vec![1, 2, 3], vec![4, 5, 6]]);
     /// # Ok(())
@@ -347,12 +341,12 @@ impl<T> Vecgrid<T> {
     /// [`Vecgrid`]: struct.Vecgrid.html
     /// [column major order]: https://en.wikipedia.org/wiki/Row-_and_column-major_order
     pub fn from_column_major(
-        elements: &[T],
+        elements: Vec<T>,
         num_rows: usize,
         num_columns: usize,
     ) -> Result<Self, Error>
     where
-        T: Clone,
+        T: Clone, // TODO: remove type guard
     {
         let total_len = num_rows * num_columns;
         if total_len != elements.len() {
@@ -458,7 +452,7 @@ impl<T> Vecgrid<T> {
     {
         let total_len = num_rows * num_columns;
         let vecgrid_column_major = (0..total_len).map(|_| generator()).collect::<Vec<_>>();
-        Vecgrid::from_column_major(&vecgrid_column_major, num_rows, num_columns)
+        Vecgrid::from_column_major(vecgrid_column_major, num_rows, num_columns)
             .expect("Filled by should never fail")
     }
 
@@ -537,7 +531,7 @@ impl<T> Vecgrid<T> {
     {
         let total_len = num_rows * num_columns;
         let vecgrid_column_major = iterator.take(total_len).collect::<Vec<_>>();
-        Vecgrid::from_column_major(&vecgrid_column_major, num_rows, num_columns)
+        Vecgrid::from_column_major(vecgrid_column_major, num_rows, num_columns)
             .map_err(|_| Error::NotEnoughElements)
     }
 
@@ -1268,7 +1262,7 @@ impl<T> Vecgrid<T> {
     /// # use vecgrid::{Vecgrid, Error};
     /// # fn main() -> Result<(), Error> {
     /// let columns = vec![vec![1, 4], vec![2, 5], vec![3, 6]];
-    /// let vecgrid = Vecgrid::from_columns(&columns)?;
+    /// let vecgrid = Vecgrid::from_columns(columns.clone())?;
     /// assert_eq!(vecgrid.as_columns(), columns);
     /// # Ok(())
     /// # }

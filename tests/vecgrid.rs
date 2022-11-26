@@ -15,7 +15,7 @@ fn test_from_rows() -> Result<(), Error> {
 #[test]
 fn test_from_columns() -> Result<(), Error> {
     let columns = vec![vec![1, 4], vec![2, 5], vec![3, 6]];
-    let vecgrid = Vecgrid::from_columns(&columns)?;
+    let vecgrid = Vecgrid::from_columns(columns.clone())?;
     assert_eq!(vecgrid.as_columns(), columns);
     Ok(())
 }
@@ -26,7 +26,7 @@ fn test_from_row_major() -> Result<(), Error> {
     let row_major = vec![1, 2, 3, 4, 5, 6];
     let num_rows = 2;
     let num_columns = 3;
-    let vecgrid = Vecgrid::from_row_major(&row_major, num_rows, num_columns)?;
+    let vecgrid = Vecgrid::from_row_major(row_major, num_rows, num_columns)?;
     for (row_index, row) in rows.iter().enumerate() {
         for (column_index, element) in row.iter().enumerate() {
             assert_eq!(vecgrid.get(row_index, column_index), Some(element));
@@ -41,7 +41,7 @@ fn test_from_column_major() -> Result<(), Error> {
     let column_major = vec![1, 4, 2, 5, 3, 6];
     let num_rows = 2;
     let num_columns = 3;
-    let vecgrid = Vecgrid::from_column_major(&column_major, num_rows, num_columns)?;
+    let vecgrid = Vecgrid::from_column_major(column_major, num_rows, num_columns)?;
     for (row_index, row) in rows.iter().enumerate() {
         for (column_index, element) in row.iter().enumerate() {
             assert_eq!(vecgrid.get(row_index, column_index), Some(element));
@@ -499,7 +499,7 @@ fn test_from_rows_not_all_same_size() {
 #[test]
 fn test_from_columns_not_all_same_size() {
     let columns = vec![vec![1, 4], vec![2, 3], vec![4]];
-    let result = Vecgrid::from_columns(&columns);
+    let result = Vecgrid::from_columns(columns.clone());
     assert_eq!(result, Err(Error::DimensionMismatch));
 }
 
@@ -508,7 +508,7 @@ fn test_from_row_major_dimensions_do_not_match_size() {
     let row_major = vec![1, 2, 3, 4, 5, 6, 7];
     let num_rows = 2;
     let num_columns = 3;
-    let result = Vecgrid::from_row_major(&row_major, num_rows, num_columns);
+    let result = Vecgrid::from_row_major(row_major, num_rows, num_columns);
     assert_eq!(result, Err(Error::DimensionMismatch));
 }
 
@@ -517,7 +517,7 @@ fn test_from_column_major_dimensions_do_not_match_size() {
     let column_major = vec![1, 4, 2, 5, 3];
     let num_rows = 2;
     let num_columns = 3;
-    let result = Vecgrid::from_column_major(&column_major, num_rows, num_columns);
+    let result = Vecgrid::from_column_major(column_major, num_rows, num_columns);
     assert_eq!(result, Err(Error::DimensionMismatch));
 }
 
@@ -637,7 +637,7 @@ fn test_empty_vecgrid_from_rows() -> Result<(), Error> {
 #[test]
 fn test_empty_vecgrid_from_row_major() -> Result<(), Error> {
     let row_major: Vec<i32> = vec![];
-    let vecgrid = Vecgrid::from_row_major(&row_major, 0, 0)?;
+    let vecgrid = Vecgrid::from_row_major(row_major, 0, 0)?;
     assert_eq!(vecgrid.num_rows(), 0);
     assert_eq!(vecgrid.num_columns(), 0);
     assert_eq!(vecgrid.row_len(), 0);
@@ -659,7 +659,7 @@ fn test_empty_vecgrid_from_rows_many_empty_rows() -> Result<(), Error> {
 #[test]
 fn test_empty_vecgrid_from_row_major_non_zero_columns() -> Result<(), Error> {
     let row_major: Vec<i32> = vec![];
-    let vecgrid = Vecgrid::from_row_major(&row_major, 0, 4)?;
+    let vecgrid = Vecgrid::from_row_major(row_major, 0, 4)?;
     assert_eq!(vecgrid.num_rows(), 0);
     assert_eq!(vecgrid.num_columns(), 4);
     assert_eq!(vecgrid.row_len(), 4);

@@ -41,9 +41,9 @@ A [`Vecgrid`] can be created in many different ways. These include:
 
 - Providing the rows or the columns, which must all be the same size (see
   [`from_rows`] and [`from_columns`]).
-- Providing a "flat" slice of elements in either [row major or column
+- Providing a "flat" vector of elements in either [row major or column
   major order] along with the dimensions, which must match the number of
-  elements in the slice (see [`from_row_major`] and
+  elements in the vector (see [`from_row_major`] and
   [`from_column_major`]).
 - Providing a value to repeatedly put in every location (see
   [`filled_with`]).
