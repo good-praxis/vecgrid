@@ -1495,26 +1495,21 @@ impl<T> Vecgrid<T> {
     /// # Ok(())
     /// # }
     ///
-    pub fn insert_rows(&mut self, rows: &mut [Vec<T>], at: usize) -> Result<(), Error> {
+    pub fn insert_rows(&mut self, mut rows: Vec<Vec<T>>, at: usize) -> Result<(), Error> {
         match (
             rows.iter_mut().all(|r| r.len() == self.num_columns),
-            at < self.num_rows,
+            at < self.num_rows + 1,
         ) {
             (false, _) => Err(Error::DimensionMismatch),
             (_, false) => Err(Error::IndexOutOfBounds(at)),
             (true, true) => {
                 let i = at * self.row_len();
                 let capacity = self.num_columns * rows.len();
+                let num_new_rows = rows.len();
 
-                self.vecgrid.splice(
-                    i..i,
-                    rows.iter_mut()
-                        .fold(Vec::with_capacity(capacity), |mut vec, r| {
-                            vec.append(r);
-                            vec
-                        }),
-                );
-                self.num_rows += rows.len();
+                self.vecgrid
+                    .splice(i..i, with_size_hint(rows.into_iter().flatten(), capacity));
+                self.num_rows += num_new_rows;
                 Ok(())
             }
         }
@@ -1535,16 +1530,8 @@ impl<T> Vecgrid<T> {
     /// # Ok(())
     /// # }
     ///
-    pub fn append_rows(&mut self, rows: &mut [Vec<T>]) -> Result<(), Error> {
-        if !rows.iter_mut().all(|r| r.len() == self.num_columns) {
-            return Err(Error::DimensionMismatch);
-        }
-        self.vecgrid.reserve(rows.len() * self.num_columns);
-        for row in rows {
-            self.vecgrid.append(row);
-            self.num_rows += 1;
-        }
-        Ok(())
+    pub fn append_rows(&mut self, rows: Vec<Vec<T>>) -> Result<(), Error> {
+        self.insert_rows(rows, self.num_rows)
     }
 }
 
@@ -1606,6 +1593,26 @@ impl<T> IndexMut<(usize, usize)> for Vecgrid<T> {
 
 fn flatten<T: Clone>(nested: &[Vec<T>]) -> Vec<T> {
     nested.iter().flat_map(|row| row.clone()).collect()
+}
+
+struct SizeHint<I: Iterator> {
+    inner: I,
+    size_hint: usize,
+}
+impl<I: Iterator> Iterator for SizeHint<I> {
+    type Item = I::Item;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.size_hint = self.size_hint.saturating_sub(1);
+        self.inner.next()
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.size_hint, Some(self.size_hint))
+    }
+}
+fn with_size_hint<I: Iterator>(inner: I, size_hint: usize) -> SizeHint<I> {
+    SizeHint { inner, size_hint }
 }
 
 fn indices_row_major(

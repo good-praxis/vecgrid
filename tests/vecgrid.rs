@@ -804,19 +804,19 @@ fn test_insert_row() -> Result<(), Error> {
 #[test]
 fn test_insert_rows() -> Result<(), Error> {
     let rows = vec![vec![1, 2], vec![7, 8]];
-    let mut new_rows = vec![vec![3, 4], vec![5, 6]];
+    let new_rows = vec![vec![3, 4], vec![5, 6]];
     let result = vec![vec![1, 2], vec![3, 4], vec![5, 6], vec![7, 8]];
     let mut vecgrid = Vecgrid::from_rows(&rows)?;
     assert_eq!(vecgrid.num_rows(), 2);
-    vecgrid.insert_rows(&mut new_rows.clone(), 1)?;
+    vecgrid.insert_rows(new_rows.clone(), 1)?;
     assert_eq!(vecgrid.as_rows(), result);
     assert_eq!(vecgrid.num_rows(), 4);
 
     let invalid_row = vec![9, 10, 11];
     let mut invalid_rows = new_rows.clone();
     invalid_rows.insert(2, invalid_row);
-    assert!(vecgrid.insert_rows(&mut invalid_rows, 1).is_err());
-    assert!(vecgrid.insert_rows(&mut new_rows, 10).is_err());
+    assert!(vecgrid.insert_rows(invalid_rows, 1).is_err());
+    assert!(vecgrid.insert_rows(new_rows, 10).is_err());
     Ok(())
 }
 
@@ -827,14 +827,14 @@ fn test_append_rows() -> Result<(), Error> {
     let result = vec![vec![1, 2], vec![3, 4], vec![5, 6], vec![7, 8]];
     let mut vecgrid = Vecgrid::from_rows(&rows)?;
     assert_eq!(vecgrid.num_rows(), 2);
-    vecgrid.append_rows(&mut new_rows.clone())?;
+    vecgrid.append_rows(new_rows.clone())?;
     assert_eq!(vecgrid.as_rows(), result);
     assert_eq!(vecgrid.num_rows(), 4);
 
     let invalid_row = vec![9, 10, 11];
     let mut invalid_rows = new_rows.clone();
     invalid_rows.insert(2, invalid_row);
-    assert!(vecgrid.append_rows(&mut invalid_rows).is_err());
+    assert!(vecgrid.append_rows(invalid_rows).is_err());
     Ok(())
 }
 
