@@ -181,6 +181,12 @@ This library is made possible thanks to the excellent groundwork laid down in [`
 [`get`]: https://docs.rs/vecgrid/latest/vecgrid/struct.Vecgrid.html#method.get
 [`get_mut`]: https://docs.rs/vecgrid/latest/vecgrid/struct.Vecgrid.html#method.get_mut
 [`set`]: https://docs.rs/vecgrid/latest/vecgrid/struct.Vecgrid.html#method.set
+[`get_row_major`]: https://docs.rs/vecgrid/latest/vecgrid/struct.Vecgrid.html#method.get_row_major
+[`get_mut_row_major`]: https://docs.rs/vecgrid/latest/vecgrid/struct.Vecgrid.html#method.get_mut_row_major
+[`set_row_major`]: https://docs.rs/vecgrid/latest/vecgrid/struct.Vecgrid.html#method.set_row_major
+[`get_column_major`]: https://docs.rs/vecgrid/latest/vecgrid/struct.Vecgrid.html#method.get_column_major
+[`get_mut_column_major`]: https://docs.rs/vecgrid/latest/vecgrid/struct.Vecgrid.html#method.get_mut_column_major
+[`set_column_major`]: https://docs.rs/vecgrid/latest/vecgrid/struct.Vecgrid.html#method.set_column_major
 [`elements_row_major_iter`]: https://docs.rs/vecgrid/latest/vecgrid/struct.Vecgrid.html#method.elements_row_major_iter
 [`elements_column_major_iter`]: https://docs.rs/vecgrid/latest/vecgrid/struct.Vecgrid.html#method.elements_column_major_iter
 [`elements_row_major_iter_mut`]: https://docs.rs/vecgrid/latest/vecgrid/struct.Vecgrid.html#method.elements_row_major_iter_mut
