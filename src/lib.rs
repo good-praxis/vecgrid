@@ -280,7 +280,7 @@ impl<T> Vecgrid<T> {
         })
     }
 
-    /// Creates a new [`Vecgrid`] from the given flat slice in [row major
+    /// Creates a new [`Vecgrid`] from the given flat [`Vec`] in [row major
     /// order].
     ///
     /// Returns an error if the number of elements in `elements` is not the
@@ -318,7 +318,7 @@ impl<T> Vecgrid<T> {
         })
     }
 
-    /// Creates a new [`Vecgrid`] from the given flat slice in [column major
+    /// Creates a new [`Vecgrid`] from the given flat [`Vec`] in [column major
     /// order].
     ///
     /// Return an error if the number of elements in `elements` is not the
