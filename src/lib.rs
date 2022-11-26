@@ -32,6 +32,7 @@
 //!   - Providing singular rows of matching length alongside row indices to [`insert_row`],
 //!     or providing a mutable slice of rows to [`insert_rows`].
 //!   - Append the grid, either with matching length rows via [`append_rows`]... or future additions!
+//!   - Remove singular or consecutive rows via [`remove_row`] and [`remove_rows`] respectively.
 //!
 //! ## Accessing data from an [`Vecgrid`]
 //!
@@ -171,6 +172,8 @@
 //! [`insert_row`]: struct.Vecgrid.html#method.insert_row
 //! [`insert_rows`]: struct.Vecgrid.html#method.insert_rows
 //! [`append_rows`]: struct.Vecgrid.html#method.append_rows
+//! [`remove_row`]: struct.Vecgrid.html#method.remove_row
+//! [`remove_rows`]: struct.Vecgrid.html#method.remove_rows
 //! [`Vec`]: https://doc.rust-lang.org/std/vec/struct.Vec.html
 //! [`Option`]: https://doc.rust-lang.org/std/option/
 //! [`Result`]: https://doc.rust-lang.org/std/result/
@@ -1508,7 +1511,7 @@ impl<T> Vecgrid<T> {
         }
     }
 
-    /// Appends a slice of rows at the end of the vecgrid.
+    /// Appends a vec of rows at the end of the vecgrid.
     /// Guards ensure that the supplied rows matches the expected dimensions.
     ///
     /// # Examples
@@ -1525,6 +1528,49 @@ impl<T> Vecgrid<T> {
     ///
     pub fn append_rows(&mut self, rows: Vec<Vec<T>>) -> Result<(), Error> {
         self.insert_rows(rows, self.num_rows)
+    }
+
+    /// Removes a row at the provided row index from the vecgrid.
+    /// Guards ensure that the index is in bound.
+    ///
+    /// # Examples
+    /// # use vecgrid::{Vecgrid, Error};
+    /// # fn main() -> Result<(), Error> {
+    /// let rows = vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 9]];
+    /// let result = vec![vec![1, 2, 3], vec![7, 8, 9]];
+    /// let mut vecgrid = Vecgrid::from_rows(rows)?;
+    /// vecgrid.remove_row(1)?;
+    /// assert_eq!(vecgrid.as_rows(), result);
+    /// # Ok(())
+    /// # }
+    ///
+    pub fn remove_row(&mut self, at: usize) -> Result<(), Error> {
+        self.remove_rows(at, 1)
+    }
+
+    /// Removes `n` consecutive rows at the provided row index from the vecgrid.
+    /// Guards ensure that the index is in bound.
+    ///
+    /// # Examples
+    /// # use vecgrid::{Vecgrid, Error};
+    /// # fn main() -> Result<(), Error> {
+    /// let rows = vec![vec![1, 2], vec![3, 4], vec![5, 6], vec![7, 8]];
+    /// let result = vec![vec![1, 2], vec![7, 8]];
+    /// let mut vecgrid = Vecgrid::from_rows(rows)?;
+    /// vecgrid.remove_rows(1, 2)?;
+    /// assert_eq!(vecgrid.as_rows(), result);
+    /// # Ok(())
+    /// # }
+    ///
+    pub fn remove_rows(&mut self, at: usize, n: usize) -> Result<(), Error> {
+        if at > self.num_rows && at + n > self.num_rows + 1 {
+            return Err(Error::IndicesOutOfBounds(at, at + n));
+        }
+        let start = self.row_len() * at;
+        let end = start + n * self.row_len();
+        self.vecgrid.drain(start..end);
+        self.num_rows -= n;
+        Ok(())
     }
 }
 

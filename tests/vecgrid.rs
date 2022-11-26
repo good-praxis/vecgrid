@@ -838,6 +838,34 @@ fn test_append_rows() -> Result<(), Error> {
     Ok(())
 }
 
+#[test]
+fn test_remove_row() -> Result<(), Error> {
+    let rows = vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 9]];
+    let result = vec![vec![1, 2, 3], vec![7, 8, 9]];
+    let mut vecgrid = Vecgrid::from_rows(rows)?;
+    assert_eq!(vecgrid.num_rows(), 3);
+    vecgrid.remove_row(1)?;
+    assert_eq!(vecgrid.num_rows(), 2);
+    assert_eq!(vecgrid.as_rows(), result);
+
+    assert!(vecgrid.remove_row(3).is_err());
+    Ok(())
+}
+
+#[test]
+fn test_remove_rows() -> Result<(), Error> {
+    let rows = vec![vec![1, 2], vec![3, 4], vec![5, 6], vec![7, 8]];
+    let result = vec![vec![1, 2], vec![7, 8]];
+    let mut vecgrid = Vecgrid::from_rows(rows)?;
+    assert_eq!(vecgrid.num_rows(), 4);
+    vecgrid.remove_rows(1, 2)?;
+    assert_eq!(vecgrid.num_rows(), 2);
+    assert_eq!(vecgrid.as_rows(), result);
+
+    assert!(vecgrid.remove_row(3).is_err());
+    Ok(())
+}
+
 fn main() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
     let vecgrid = Vecgrid::from_rows(rows.clone())?;
