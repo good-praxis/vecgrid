@@ -1,5 +1,8 @@
 # vecgrid
 
+[![dependency status](https://deps.rs/repo/github/good-praxis/vecgrid/status.svg)](https://deps.rs/repo/github/good-praxis/vecgrid)
+[![Build Status](https://github.com/good-praxis/vecgrid/workflows/CI/badge.svg)](https://github.com/good-praxis/vecgrid/actions?workflow=CI)
+
 Vecgrid provides a dynamically sized two-dimensional vector. It is more efficient
 and is easier to use than a vector of vectors, i.e. `Vec<Vec<T>>`.
 
