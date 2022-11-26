@@ -1563,7 +1563,7 @@ impl<T> Vecgrid<T> {
     /// # }
     ///
     pub fn remove_rows(&mut self, at: usize, n: usize) -> Result<(), Error> {
-        if at > self.num_rows && at + n > self.num_rows + 1 {
+        if at + n > self.num_rows + 1 {
             return Err(Error::IndicesOutOfBounds(at, at + n));
         }
         let start = self.row_len() * at;
