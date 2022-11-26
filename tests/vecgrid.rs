@@ -7,7 +7,7 @@ use vecgrid::{Error, Vecgrid};
 #[test]
 fn test_from_rows() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let vecgrid = Vecgrid::from_rows(&rows)?;
+    let vecgrid = Vecgrid::from_rows(rows.clone())?;
     assert_eq!(vecgrid.as_rows(), rows);
     Ok(())
 }
@@ -115,7 +115,7 @@ fn test_from_iter_column_major() -> Result<(), Error> {
 #[test]
 fn test_dimensions() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let vecgrid = Vecgrid::from_rows(&rows)?;
+    let vecgrid = Vecgrid::from_rows(rows.clone())?;
     assert_eq!(vecgrid.num_rows(), 2);
     assert_eq!(vecgrid.num_columns(), 3);
     assert_eq!(vecgrid.row_len(), 3);
@@ -126,7 +126,7 @@ fn test_dimensions() -> Result<(), Error> {
 #[test]
 fn test_get() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let vecgrid = Vecgrid::from_rows(&rows)?;
+    let vecgrid = Vecgrid::from_rows(rows.clone())?;
     for row in 0..rows.len() {
         for column in 0..rows[0].len() {
             assert_eq!(vecgrid.get(row, column), Some(&rows[row][column]));
@@ -138,7 +138,7 @@ fn test_get() -> Result<(), Error> {
 #[test]
 fn test_get_row_major() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let vecgrid = Vecgrid::from_rows(&rows)?;
+    let vecgrid = Vecgrid::from_rows(rows.clone())?;
     assert_eq!(vecgrid.get_row_major(0), Some(&1));
     assert_eq!(vecgrid.get_row_major(1), Some(&2));
     assert_eq!(vecgrid.get_row_major(2), Some(&3));
@@ -152,7 +152,7 @@ fn test_get_row_major() -> Result<(), Error> {
 #[test]
 fn test_get_column_major() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let vecgrid = Vecgrid::from_rows(&rows)?;
+    let vecgrid = Vecgrid::from_rows(rows.clone())?;
     assert_eq!(vecgrid.get_column_major(0), Some(&1));
     assert_eq!(vecgrid.get_column_major(1), Some(&4));
     assert_eq!(vecgrid.get_column_major(2), Some(&2));
@@ -166,7 +166,7 @@ fn test_get_column_major() -> Result<(), Error> {
 #[test]
 fn test_get_mut() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    let mut vecgrid = Vecgrid::from_rows(rows.clone())?;
     let (set_row, set_column) = (0, 2);
     let element = 53;
     let element_ref_option = vecgrid.get_mut(set_row, set_column);
@@ -191,7 +191,7 @@ fn test_get_mut() -> Result<(), Error> {
 #[test]
 fn test_get_mut_row_major() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    let mut vecgrid = Vecgrid::from_rows(rows.clone())?;
     assert_eq!(vecgrid.get_mut_row_major(0), Some(&mut 1));
     assert_eq!(vecgrid.get_mut_row_major(1), Some(&mut 2));
     assert_eq!(vecgrid.get_mut_row_major(2), Some(&mut 3));
@@ -205,7 +205,7 @@ fn test_get_mut_row_major() -> Result<(), Error> {
 #[test]
 fn test_get_mut_column_major() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    let mut vecgrid = Vecgrid::from_rows(rows.clone())?;
     assert_eq!(vecgrid.get_mut_column_major(0), Some(&mut 1));
     assert_eq!(vecgrid.get_mut_column_major(1), Some(&mut 4));
     assert_eq!(vecgrid.get_mut_column_major(2), Some(&mut 2));
@@ -219,7 +219,7 @@ fn test_get_mut_column_major() -> Result<(), Error> {
 #[test]
 fn test_set() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    let mut vecgrid = Vecgrid::from_rows(rows.clone())?;
     let (set_row, set_column) = (1, 0);
     let element = 42;
     vecgrid.set(set_row, set_column, element).unwrap();
@@ -239,7 +239,7 @@ fn test_set() -> Result<(), Error> {
 #[test]
 fn test_set_row_major() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    let mut vecgrid = Vecgrid::from_rows(rows.clone())?;
     let set_index = 4;
     let set_row = 1;
     let set_column = 1;
@@ -261,7 +261,7 @@ fn test_set_row_major() -> Result<(), Error> {
 #[test]
 fn test_set_column_major() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    let mut vecgrid = Vecgrid::from_rows(rows.clone())?;
     let set_index = 4;
     let set_row = 0;
     let set_column = 2;
@@ -284,7 +284,7 @@ fn test_set_column_major() -> Result<(), Error> {
 fn test_elements_row_major_iter() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
     let row_major = vec![1, 2, 3, 4, 5, 6];
-    let vecgrid = Vecgrid::from_rows(&rows)?;
+    let vecgrid = Vecgrid::from_rows(rows.clone())?;
     let row_len = rows[0].len();
     for (index, element) in vecgrid.elements_row_major_iter().enumerate() {
         let row_index = index / row_len;
@@ -300,7 +300,7 @@ fn test_elements_row_major_iter() -> Result<(), Error> {
 fn test_elements_row_major_iter_mut() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
     let row_major = vec![1, 2, 3, 4, 5, 6];
-    let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    let mut vecgrid = Vecgrid::from_rows(rows.clone())?;
     let row_len = rows[0].len();
     for (index, element) in vecgrid.elements_row_major_iter_mut().enumerate() {
         let row_index = index / row_len;
@@ -317,7 +317,7 @@ fn test_elements_row_major_iter_mut() -> Result<(), Error> {
 fn test_elements_column_major_iter() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
     let column_major = vec![1, 4, 2, 5, 3, 6];
-    let vecgrid = Vecgrid::from_rows(&rows)?;
+    let vecgrid = Vecgrid::from_rows(rows.clone())?;
     let column_len = rows.len();
     for (index, element) in vecgrid.elements_column_major_iter().enumerate() {
         let column_index = index / column_len;
@@ -333,7 +333,7 @@ fn test_elements_column_major_iter() -> Result<(), Error> {
 fn test_elements_column_major_iter_mut() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
     let column_major = vec![1, 4, 2, 5, 3, 6];
-    let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    let mut vecgrid = Vecgrid::from_rows(rows.clone())?;
     let column_len = rows.len();
     for (index, element) in vecgrid.elements_column_major_iter_mut().enumerate() {
         let column_index = index / column_len;
@@ -349,7 +349,7 @@ fn test_elements_column_major_iter_mut() -> Result<(), Error> {
 #[test]
 fn test_row_iter() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let vecgrid = Vecgrid::from_rows(&rows)?;
+    let vecgrid = Vecgrid::from_rows(rows.clone())?;
     let first_row_iter = vecgrid.row_iter(0)?;
     for (index, element) in first_row_iter.enumerate() {
         assert_eq!(element, &rows[0][index]);
@@ -364,7 +364,7 @@ fn test_row_iter() -> Result<(), Error> {
 #[test]
 fn test_row_iter_mut() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    let mut vecgrid = Vecgrid::from_rows(rows.clone())?;
     let first_row_iter = vecgrid.row_iter_mut(0)?;
     for (index, element) in first_row_iter.enumerate() {
         *element += 1;
@@ -373,7 +373,7 @@ fn test_row_iter_mut() -> Result<(), Error> {
     let second_row_iter = vecgrid.row_iter_mut(1)?;
     for (index, element) in second_row_iter.enumerate() {
         *element += 1;
-        assert_eq!(*element, &rows[1][index] + 1);
+        assert_eq!(*element, rows[1][index] + 1);
     }
     Ok(())
 }
@@ -381,7 +381,7 @@ fn test_row_iter_mut() -> Result<(), Error> {
 #[test]
 fn test_column_iter() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let vecgrid = Vecgrid::from_rows(&rows)?;
+    let vecgrid = Vecgrid::from_rows(rows.clone())?;
     let first_column_iter = vecgrid.column_iter(0)?;
     for (index, element) in first_column_iter.enumerate() {
         assert_eq!(element, &rows[index][0]);
@@ -396,7 +396,7 @@ fn test_column_iter() -> Result<(), Error> {
 #[test]
 fn test_column_iter_mut() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    let mut vecgrid = Vecgrid::from_rows(rows.clone())?;
     let first_column_iter = vecgrid.column_iter_mut(0)?;
     for (index, element) in first_column_iter.enumerate() {
         *element += 1;
@@ -413,7 +413,7 @@ fn test_column_iter_mut() -> Result<(), Error> {
 #[test]
 fn test_rows_iter() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let vecgrid = Vecgrid::from_rows(&rows)?;
+    let vecgrid = Vecgrid::from_rows(rows.clone())?;
     for (row_index, row_iter) in vecgrid.rows_iter().enumerate() {
         for (column_index, element) in row_iter.enumerate() {
             assert_eq!(element, &rows[row_index][column_index]);
@@ -425,7 +425,7 @@ fn test_rows_iter() -> Result<(), Error> {
 #[test]
 fn test_rows_iter_mut() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    let mut vecgrid = Vecgrid::from_rows(rows.clone())?;
     for (row_index, row_iter) in vecgrid.rows_iter_mut().enumerate() {
         for (column_index, element) in row_iter.enumerate() {
             *element += 1;
@@ -438,7 +438,7 @@ fn test_rows_iter_mut() -> Result<(), Error> {
 #[test]
 fn test_columns_iter() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let vecgrid = Vecgrid::from_rows(&rows)?;
+    let vecgrid = Vecgrid::from_rows(rows.clone())?;
     for (column_index, column_iter) in vecgrid.columns_iter().enumerate() {
         for (row_index, element) in column_iter.enumerate() {
             assert_eq!(element, &rows[row_index][column_index]);
@@ -450,7 +450,7 @@ fn test_columns_iter() -> Result<(), Error> {
 #[test]
 fn test_columns_iter_mut() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    let mut vecgrid = Vecgrid::from_rows(rows.clone())?;
     for (column_index, column_iter) in vecgrid.columns_iter_mut().enumerate() {
         for (row_index, element) in column_iter.enumerate() {
             *element += 1;
@@ -463,7 +463,7 @@ fn test_columns_iter_mut() -> Result<(), Error> {
 #[test]
 fn test_op_index() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let vecgrid = Vecgrid::from_rows(&rows)?;
+    let vecgrid = Vecgrid::from_rows(rows.clone())?;
     for row in 0..rows.len() {
         for column in 0..rows[0].len() {
             assert_eq!(vecgrid[(row, column)], rows[row][column]);
@@ -475,7 +475,7 @@ fn test_op_index() -> Result<(), Error> {
 #[test]
 fn test_op_index_mut() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    let mut vecgrid = Vecgrid::from_rows(rows.clone())?;
     for row in 0..rows.len() {
         for column in 0..rows[0].len() {
             vecgrid[(row, column)] += 1;
@@ -492,7 +492,7 @@ fn test_op_index_mut() -> Result<(), Error> {
 #[test]
 fn test_from_rows_not_all_same_size() {
     let rows = vec![vec![1, 2, 3], vec![4, 5]];
-    let result = Vecgrid::from_rows(&rows);
+    let result = Vecgrid::from_rows(rows.clone());
     assert_eq!(result, Err(Error::DimensionMismatch));
 }
 
@@ -626,7 +626,7 @@ fn test_index_mut_out_of_bounds_row_and_column() {
 #[test]
 fn test_empty_vecgrid_from_rows() -> Result<(), Error> {
     let rows: Vec<Vec<i32>> = vec![];
-    let vecgrid = Vecgrid::from_rows(&rows)?;
+    let vecgrid = Vecgrid::from_rows(rows.clone())?;
     assert_eq!(vecgrid.num_rows(), 0);
     assert_eq!(vecgrid.num_columns(), 0);
     assert_eq!(vecgrid.row_len(), 0);
@@ -648,7 +648,7 @@ fn test_empty_vecgrid_from_row_major() -> Result<(), Error> {
 #[test]
 fn test_empty_vecgrid_from_rows_many_empty_rows() -> Result<(), Error> {
     let rows: Vec<Vec<i32>> = vec![vec![], vec![], vec![]];
-    let vecgrid = Vecgrid::from_rows(&rows)?;
+    let vecgrid = Vecgrid::from_rows(rows.clone())?;
     assert_eq!(vecgrid.num_rows(), 3);
     assert_eq!(vecgrid.num_columns(), 0);
     assert_eq!(vecgrid.row_len(), 0);
@@ -674,7 +674,7 @@ fn test_empty_vecgrid_from_row_major_non_zero_columns() -> Result<(), Error> {
 #[test]
 fn test_double_ended_iterator_elements_row_major_iter() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let vecgrid = Vecgrid::from_rows(&rows)?;
+    let vecgrid = Vecgrid::from_rows(rows.clone())?;
     let reversed_columns = vecgrid
         .elements_row_major_iter()
         .cloned()
@@ -687,7 +687,7 @@ fn test_double_ended_iterator_elements_row_major_iter() -> Result<(), Error> {
 #[test]
 fn test_double_ended_iterator_elements_column_major_iter() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let vecgrid = Vecgrid::from_rows(&rows)?;
+    let vecgrid = Vecgrid::from_rows(rows.clone())?;
     let reversed_columns = vecgrid
         .elements_column_major_iter()
         .cloned()
@@ -700,7 +700,7 @@ fn test_double_ended_iterator_elements_column_major_iter() -> Result<(), Error> 
 #[test]
 fn test_double_ended_iterator_row_iter() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let vecgrid = Vecgrid::from_rows(&rows)?;
+    let vecgrid = Vecgrid::from_rows(rows.clone())?;
     let reversed_columns = vecgrid.row_iter(0)?.cloned().rev().collect::<Vec<_>>();
     assert_eq!(reversed_columns, vec![3, 2, 1]);
     Ok(())
@@ -709,7 +709,7 @@ fn test_double_ended_iterator_row_iter() -> Result<(), Error> {
 #[test]
 fn test_double_ended_iterator_column_iter() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let vecgrid = Vecgrid::from_rows(&rows)?;
+    let vecgrid = Vecgrid::from_rows(rows.clone())?;
     let reversed_columns = vecgrid.column_iter(1)?.cloned().rev().collect::<Vec<_>>();
     assert_eq!(reversed_columns, vec![5, 2]);
     Ok(())
@@ -718,7 +718,7 @@ fn test_double_ended_iterator_column_iter() -> Result<(), Error> {
 #[test]
 fn test_double_ended_iterator_rows_iter() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let vecgrid = Vecgrid::from_rows(&rows)?;
+    let vecgrid = Vecgrid::from_rows(rows.clone())?;
     let reversed_rows = vecgrid
         .rows_iter()
         .rev()
@@ -731,7 +731,7 @@ fn test_double_ended_iterator_rows_iter() -> Result<(), Error> {
 #[test]
 fn test_double_ended_iterator_columns_iter() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let vecgrid = Vecgrid::from_rows(&rows)?;
+    let vecgrid = Vecgrid::from_rows(rows.clone())?;
     let reversed_columns = vecgrid
         .columns_iter()
         .rev()
@@ -744,7 +744,7 @@ fn test_double_ended_iterator_columns_iter() -> Result<(), Error> {
 #[test]
 fn test_indices_row_major() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let vecgrid = Vecgrid::from_rows(&rows)?;
+    let vecgrid = Vecgrid::from_rows(rows.clone())?;
     let indices_row_major = vecgrid.indices_row_major().collect::<Vec<_>>();
     assert_eq!(
         indices_row_major,
@@ -756,7 +756,7 @@ fn test_indices_row_major() -> Result<(), Error> {
 #[test]
 fn test_indices_column_major() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let vecgrid = Vecgrid::from_rows(&rows)?;
+    let vecgrid = Vecgrid::from_rows(rows.clone())?;
     let indices_column_major = vecgrid.indices_column_major().collect::<Vec<_>>();
     assert_eq!(
         indices_column_major,
@@ -768,7 +768,7 @@ fn test_indices_column_major() -> Result<(), Error> {
 #[test]
 fn test_enumerate_row_major() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let vecgrid = Vecgrid::from_rows(&rows)?;
+    let vecgrid = Vecgrid::from_rows(rows.clone())?;
     let enumerate_row_major = vecgrid.enumerate_row_major().collect::<Vec<_>>();
     assert_eq!(
         enumerate_row_major,
@@ -789,7 +789,7 @@ fn test_insert_row() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![7, 8, 9]];
     let new_row = vec![4, 5, 6];
     let result = vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 9]];
-    let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    let mut vecgrid = Vecgrid::from_rows(rows.clone())?;
     assert_eq!(vecgrid.num_rows(), 2);
     vecgrid.insert_row(new_row.clone(), 1)?;
     assert_eq!(vecgrid.as_rows(), result);
@@ -806,7 +806,7 @@ fn test_insert_rows() -> Result<(), Error> {
     let rows = vec![vec![1, 2], vec![7, 8]];
     let new_rows = vec![vec![3, 4], vec![5, 6]];
     let result = vec![vec![1, 2], vec![3, 4], vec![5, 6], vec![7, 8]];
-    let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    let mut vecgrid = Vecgrid::from_rows(rows)?;
     assert_eq!(vecgrid.num_rows(), 2);
     vecgrid.insert_rows(new_rows.clone(), 1)?;
     assert_eq!(vecgrid.as_rows(), result);
@@ -825,7 +825,7 @@ fn test_append_rows() -> Result<(), Error> {
     let rows = vec![vec![1, 2], vec![3, 4]];
     let new_rows = vec![vec![5, 6], vec![7, 8]];
     let result = vec![vec![1, 2], vec![3, 4], vec![5, 6], vec![7, 8]];
-    let mut vecgrid = Vecgrid::from_rows(&rows)?;
+    let mut vecgrid = Vecgrid::from_rows(rows)?;
     assert_eq!(vecgrid.num_rows(), 2);
     vecgrid.append_rows(new_rows.clone())?;
     assert_eq!(vecgrid.as_rows(), result);
@@ -840,7 +840,7 @@ fn test_append_rows() -> Result<(), Error> {
 
 fn main() -> Result<(), Error> {
     let rows = vec![vec![1, 2, 3], vec![4, 5, 6]];
-    let vecgrid = Vecgrid::from_rows(&rows)?;
+    let vecgrid = Vecgrid::from_rows(rows.clone())?;
     let enumerate_column_major = vecgrid.enumerate_column_major().collect::<Vec<_>>();
     assert_eq!(
         enumerate_column_major,
