@@ -821,6 +821,23 @@ fn test_insert_rows() -> Result<(), Error> {
 }
 
 #[test]
+fn test_insert_column() -> Result<(), Error> {
+    let columns = vec![vec![1, 2, 3], vec![7, 8, 9]];
+    let new_column = vec![4, 5, 6];
+    let result = vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 9]];
+    let mut vecgrid = Vecgrid::from_columns(columns.clone())?;
+    assert_eq!(vecgrid.num_columns(), 2);
+    vecgrid.insert_column(new_column.clone(), 1)?;
+    assert_eq!(vecgrid.as_columns(), result);
+    assert_eq!(vecgrid.num_columns(), 3);
+
+    let invalid_column = vec![10, 11];
+    assert!(vecgrid.insert_column(invalid_column, 1).is_err());
+    assert!(vecgrid.insert_column(new_column, 10).is_err());
+    Ok(())
+}
+
+#[test]
 fn test_append_rows() -> Result<(), Error> {
     let rows = vec![vec![1, 2], vec![3, 4]];
     let new_rows = vec![vec![5, 6], vec![7, 8]];

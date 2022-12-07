@@ -1511,6 +1511,58 @@ impl<T> Vecgrid<T> {
         }
     }
 
+    /// Inserts a new column into the vecgrid at the provided index of the column.
+    /// Guards ensure that the supplied column matches the expected dimensions and that
+    /// the index is in bound.
+    ///
+    /// # Examples
+    /// # use vecgrid::{Vecgrid, Error};
+    /// # fn main() -> Result<(), Error> {
+    /// let columns = vec![vec![1, 2, 3], vec![7, 8, 9]];
+    /// let new_column = vec![4, 5, 6];
+    /// let result = vec![vec![1, 2, 3], vec![4, 5, 6], vec![7, 8, 9]];
+    /// let mut vecgrid = Vecgrid::from_columns(columns.clone())?;
+    /// vecgrid.insert_column(new_column, 1)?;
+    /// assert_eq!(vecgrid.as_columns(), result);
+    /// # Ok(())
+    /// # }
+    ///
+    pub fn insert_column(&mut self, mut column: Vec<T>, at: usize) -> Result<(), Error> {
+        match (column.len() == self.num_rows, at < self.num_columns) {
+            (false, _) => Err(Error::DimensionMismatch),
+            (_, false) => Err(Error::IndexOutOfBounds(at)),
+            (true, true) => {
+                self.vecgrid.reserve(column.len());
+                let new_size = column.len() + self.num_elements();
+                let mut column_idx = column.len() - 1;
+                let column_ptr = column.as_mut_ptr();
+                let mut vecgrid_idx = self.num_elements() - 1;
+                let vecgrid_ptr = self.vecgrid.as_mut_ptr();
+                for i in (0..new_size).rev() {
+                    if i % (self.num_columns + 1) == at {
+                        unsafe {
+                            vecgrid_ptr.add(i).write(column_ptr.add(column_idx).read());
+                        }
+                        column_idx = column_idx.saturating_sub(1);
+                    } else {
+                        unsafe {
+                            vecgrid_ptr
+                                .add(i)
+                                .write(vecgrid_ptr.add(vecgrid_idx).read());
+                        }
+                        vecgrid_idx = vecgrid_idx.saturating_sub(1);
+                    }
+                }
+                unsafe {
+                    self.vecgrid.set_len(new_size);
+                }
+
+                self.num_columns += 1;
+                Ok(())
+            }
+        }
+    }
+
     /// Appends a vec of rows at the end of the vecgrid.
     /// Guards ensure that the supplied rows matches the expected dimensions.
     ///
