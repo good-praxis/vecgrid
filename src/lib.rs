@@ -1534,27 +1534,28 @@ impl<T> Vecgrid<T> {
             (true, true) => {
                 self.vecgrid.reserve(column.len());
                 let new_size = column.len() + self.num_elements();
-                let mut column_idx = column.len() - 1;
-                let column_ptr = column.as_mut_ptr();
-                let mut vecgrid_idx = self.num_elements() - 1;
+                let column_ptr = column.as_ptr();
                 let vecgrid_ptr = self.vecgrid.as_mut_ptr();
-                for i in (0..new_size).rev() {
-                    if i % (self.num_columns + 1) == at {
-                        unsafe {
-                            vecgrid_ptr.add(i).write(column_ptr.add(column_idx).read());
-                        }
-                        column_idx = column_idx.saturating_sub(1);
-                    } else {
-                        unsafe {
-                            vecgrid_ptr
-                                .add(i)
-                                .write(vecgrid_ptr.add(vecgrid_idx).read());
-                        }
-                        vecgrid_idx = vecgrid_idx.saturating_sub(1);
+                for i in (0..self.num_rows).rev() {
+                    let src_offset = i * self.num_columns;
+                    let dest_offset = src_offset + i;
+                    let left = self.num_columns - at;
+                    let right = self.num_columns - left;
+                    unsafe {
+                        vecgrid_ptr
+                            .add(dest_offset + at + 1)
+                            .copy_from(vecgrid_ptr.add(src_offset + at), right);
+                        vecgrid_ptr
+                            .add(dest_offset + at)
+                            .write(column_ptr.add(i).read());
+                        vecgrid_ptr
+                            .add(dest_offset)
+                            .copy_from(vecgrid_ptr.add(src_offset), left);
                     }
                 }
                 unsafe {
                     self.vecgrid.set_len(new_size);
+                    column.set_len(0);
                 }
 
                 self.num_columns += 1;
